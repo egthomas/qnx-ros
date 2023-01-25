@@ -1,0 +1,218 @@
+#include <pthread.h>
+#include <sys/time.h>
+#include "tsg.h"
+#include "control_program.h"
+
+#ifndef _GLOBAL_SERVER_H
+#define _GLOBAL_SERVER_H
+#define Max_Control_THREADS     30
+#define Max_Viewer_THREADS     5
+#define TIMING_HOST_PORT 45001
+#define GPS_HOST_PORT 45004
+#define DDS_HOST_PORT 45002
+#define RECV_HOST_PORT 45003
+#define DIO_HOST_PORT 45005
+#ifdef __QNX__
+  #define DIO_HOST_IP "127.0.0.1"
+//  #define DIO_HOST_IP "137.229.27.228"
+  #define TIMING_HOST_IP "127.0.0.1"
+//  #define TIMING_HOST_IP "137.229.27.93"
+  #define DDS_HOST_IP "127.0.0.1"
+  #define RECV_HOST_IP "127.0.0.1"
+//  #define RECV_HOST_IP "137.229.27.228"
+//  #define GPS_HOST_IP "137.229.27.93"
+  #define GPS_HOST_IP "137.229.27.228"
+//  #define GPS_HOST_IP "127.0.0.1"
+#else
+//  #define DIO_HOST_IP "127.0.0.1"
+  #define DIO_HOST_IP "137.229.27.93"
+//  #define TIMING_HOST_IP "127.0.0.1"
+  #define TIMING_HOST_IP "137.229.27.93"
+//  #define TIMING_HOST_IP "137.229.27.223"
+//  #define GPS_HOST_IP "127.0.0.1"
+  #define GPS_HOST_IP "137.229.27.102"
+//  #define DDS_HOST_IP "127.0.0.1"
+  #define DDS_HOST_IP "137.229.27.93"
+  #define RECV_HOST_IP "127.0.0.1"
+
+#endif
+#define MAX_RADARS 2
+#define MAX_CHANNELS 4
+#define MAX_TRANSMITTERS 16
+#define MAX_BACK_ARRAY 4
+
+#define MAX_SEQS 4
+#define CLIENT 0
+#define VIEWER 1
+#define WORKER 2
+
+#define RECV_SAMPLE_HEADER 2
+#define RECV_CLRFREQ_SAMPLES  2000
+
+typedef struct _fft_index{ 
+// Struct to store and order the values of the fft preserving the index in the original array
+	double pwr;
+	double freq;
+	int index;
+} t_fft_index;
+
+struct Thread_List_Item {
+     struct Thread_List_Item *prev;
+     struct Thread_List_Item *next;     
+     pthread_t id;
+     struct timeval timeout;
+     struct timeval last_seen;
+     char name[80];
+     int type;
+     void *data;
+};
+
+
+
+struct ControlState {
+/* State Variables for internal ROS Usage */
+     int socket;
+     char ready;
+     char processing;
+     int linked; //required: DO NOT SET MANUALLY
+     int best_assigned_freq; 
+     int current_assigned_freq; 
+     int gpssecond;
+     int gpsnsecond;
+     double best_assigned_pwr; 
+     double current_assigned_pwr; 
+     int freq_change_needed; 
+     int sideband; 
+     int N; 
+     struct TSGbuf *pulseseqs[MAX_SEQS]; //array of pulseseq pointers
+     struct ControlProgram *linked_program;
+     struct timeval trigger_timeout;
+//     struct timeval last_trigger_event;
+     struct Thread_List_Item *thread;
+     t_fft_index *fft_array;
+};
+
+struct ControlProgram {
+// ros state variables
+     struct ControlState *state;
+     struct ControlData *data;
+     struct CLRFreqPRM clrfreqsearch; 
+     struct ControlPRM *parameters;
+     struct RadarPRM *radarinfo;
+     int active;
+};
+
+struct BlackList {
+// ros state variables
+     int start;
+     int end;
+     unsigned int program;
+};
+
+#define TIMING_REGISTER_SEQ '+'
+#define DDS_REGISTER_SEQ '+'
+
+#define DIO_CtrlProg_READY '1'
+#define DDS_CtrlProg_READY '1'
+#define RECV_CtrlProg_READY '1'
+#define TIMING_CtrlProg_READY '1'
+
+#define TIMING_WAIT 'W'
+
+#define DIO_PRETRIGGER '3'
+#define DDS_PRETRIGGER '3'
+#define RECV_PRETRIGGER '3'
+#define TIMING_PRETRIGGER '3'
+
+#define DIO_TRIGGER '4'
+#define TIMING_TRIGGER '4'
+#define TIMING_GPS_TRIGGER 'G'
+
+#define RECV_POSTTRIGGER '5'
+
+#define RECV_GET_DATA 'd'
+#define RECV_CLRFREQ 'C'
+
+#define GPS_GET_HDW_STATUS 'S'
+#define DIO_GET_TX_STATUS 'S'
+
+#define GPS_GET_SOFT_TIME 't'
+#define GPS_GET_HDW_STATUS 'S'
+#define GPS_GET_EVENT_TIME 'e'
+#define GPS_SCHEDULE_SINGLE_SCAN 's'
+#define GPS_SCHEDULE_REPEAT_SCAN 'r'
+#define GPS_TRIGGER_NOW 'n'
+#define GPS_SET_TRIGGER_RATE 'R'
+#define GPS_MSG_ERROR 'X'
+#define REFRESHRATE	1
+#define MAX_ERROR 0.001
+#define TIME_INTERVAL	100000000
+
+
+
+struct DriverMsg {
+     char type;
+     int status;
+
+};
+
+#define DEFAULT_FREQ 13000
+#define SIDEBAND 100
+struct FreqTable {
+  int num;
+  int dfrq;
+  int *start;
+  int *end;
+};
+
+struct tx_status {
+  int LOWPWR[MAX_TRANSMITTERS];
+  int AGC[MAX_TRANSMITTERS];
+  int status[MAX_TRANSMITTERS];
+};
+
+
+struct gps_status {
+	
+	int	hardware;
+	int	antenna;
+	int	lock;
+	int	gps_lock;
+	int	phase_lock;
+	int	reference_lock;
+	int	sv[6];
+	float	signal[6];
+	float	lat;
+	float	lon;
+	float	alt;
+	float	mlat;	
+	float	mlon;
+	float	malt;
+	int	poscnt;
+	int	gpssecond;
+	int	gpsnsecond;
+	int	syssecond;
+	int	sysnsecond;
+	int	lastsetsec;
+	int	lastsetnsec;
+	int	nextcomparesec;
+	int 	nextcomparensec;
+	float	drift;
+	float	mdrift;
+	int	tcpupdate;
+	int	tcpconnected;
+	int	timecompareupdate;
+	int	timecompareupdateerror;
+	int	lasttriggersecond;
+	int	lasttriggernsecond;
+	int	lasttcpmsg;
+	int	intervalmode;
+	int	scheduledintervalmode;
+	int	oneshot;
+	float	settimecomparetime;
+	int	triggermode;
+	int	ratesynthrate;
+
+
+};
+#endif
