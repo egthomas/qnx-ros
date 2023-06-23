@@ -10,6 +10,7 @@
 #endif
 #include <sys/mman.h>
 #include <stdint.h>
+#include "site.h"
 #include "_regs_PLX9080.h"
 #include "_prog_conventions.h"
 
@@ -28,7 +29,7 @@ int _open_PLX9080(unsigned int *BASEA, unsigned int *BASEB, unsigned int *BASEB_
 	volatile unsigned char	*BASE0, *BASE1;
 	unsigned		flags, lastbus, version, hardware, bus, device;
 	int			temp;
-	unsigned		pci_index=0;
+	unsigned		pci_index=TIMING_PCI_INDEX;
 	unsigned int		*mmap_ptr;
 #ifdef __QNX__
 	struct			_pci_config_regs pci_reg;
@@ -50,7 +51,7 @@ int _open_PLX9080(unsigned int *BASEA, unsigned int *BASEB, unsigned int *BASEB_
     /* FIND DEVICE */
 	temp=pci_find_device(DEVICE_ID, VENDOR_ID, pci_index, &bus, &device);
 	if(temp != PCI_SUCCESS){
-		perror("Cannot find GC314-PCI/FS Digital Receiver Card");
+		perror("Cannot find Timing Card");
 		return -1;
 	}
 	

@@ -102,6 +102,19 @@ int aux_input=0;
 int write_out=1;
 int write_clr_out=0;
 
+
+void graceful_cleanup(int signum)
+{
+  char path[256];
+  sprintf(path,"%s:%d","rosrecv",0);
+  close(msgsock);
+  close(sock);
+  fprintf(stdout,"Unlinking Unix Socket: %s\n",path);
+  unlink(path);
+  exit(0);
+}
+
+
 void write_raw_files (int tfreq, int beam, int sample, int radar,int channel, int buffer) {
 
   FILE *ftest;
@@ -142,33 +155,39 @@ void write_raw_files (int tfreq, int beam, int sample, int radar,int channel, in
     strcat(data_file, "/data/image_samples/");
     // data file year
     temp=(int)time_struct->tm_year+1900;
-    ltoa(temp, strtemp, 10);
+    sprintf(strtemp,"%04d",temp);
+    //ltoa(temp, strtemp, 10);
     strcat(data_file, strtemp);
     // data file month
     temp=(int)time_struct->tm_mon;
-    ltoa(temp+1,strtemp,10);
-    if(temp<10) strcat(data_file, "0");
+    sprintf(strtemp,"%02d",temp+1);
+    //ltoa(temp+1,strtemp,10);
+    //if(temp<10) strcat(data_file, "0");
     strcat(data_file, strtemp);
     // data file day
     temp=(int)time_struct->tm_mday;
-    ltoa(temp,strtemp,10);
-    if(temp<10) strcat(data_file, "0");
+    sprintf(strtemp,"%02d",temp);
+    //ltoa(temp,strtemp,10);
+    //if(temp<10) strcat(data_file, "0");
     strcat(data_file, strtemp);
     // data file hour
     temp=(int)time_struct->tm_hour;
-    ltoa(temp,strtemp,10);
-    if(temp<10) strcat(data_file, "0");
+    sprintf(strtemp,"%02d",temp);
+    //ltoa(temp,strtemp,10);
+    //if(temp<10) strcat(data_file, "0");
     strcat(data_file, strtemp);
-    // data file tens of minutes
+    // data file 5 of minutes
     temp=(int)time_struct->tm_min;
-    temp=(int)(temp/10);
-    ltoa(temp,strtemp,10);
+    temp=((int)(temp/5))*5;
+    sprintf(strtemp,"%02d",temp);
+    //ltoa(temp,strtemp,10);
     strcat(data_file, strtemp);
-    if(temp<10) strcat(data_file, "0");
+    //if(temp<10) strcat(data_file, "0");
     // data file suffix
     strcat(data_file, ".");
     temp=radar;
-    ltoa(temp,strtemp,10);
+    sprintf(strtemp,"%d",temp);
+    //ltoa(temp,strtemp,10);
     strcat(data_file, strtemp);
     strcat(data_file, ".iraw");
     strcat(data_file, chan_str);
@@ -338,7 +357,7 @@ int add_phase(int frequency, int beamdir, int length, int radar,int channel, int
          ftest=fopen(test_file, "r");
          if(ftest!=NULL){
            fclose(ftest);
-           sprintf(filename,"/tmp/ascii_samples"); 
+           sprintf(filename,"/data/ascii_samples"); 
            strcat(filename,chan_str);
            fp=fopen(filename,"a+");
            for(i=0;i<length;i++) {
@@ -414,7 +433,7 @@ int main(int argc, char **argv){
         int numclients=0;
         int ready_index[MAX_RADARS][MAX_CHANNELS];
         struct  ControlPRM  clients[maxclients],client;
-        struct timeval t0,t1,t2,t3,t4,t5,t6;
+        struct timeval tpre,tpost,t0,t1,t2,t3,t4,t5,t6;
         unsigned long elapsed;
         int card=0;
         char *driver;
@@ -433,10 +452,11 @@ int main(int argc, char **argv){
         double search_bandwidth,unusable_sideband;
         int centre,start,end;
         int max_retries=10,try=0;
-        uint64 main_address,back_address;
+        uint64_t main_address,back_address;
 #ifdef __QNX__
 	struct	 _clockperiod 	new, old;
 #endif
+	signal(SIGINT, graceful_cleanup);
         for (r=0;r<MAX_RADARS;r++){
           for (c=0;c<MAX_CHANNELS;c++){
             ready_index[r][c]=-1;
@@ -485,10 +505,12 @@ int main(int argc, char **argv){
     /* SET THE SYSTEM CLOCK RESOLUTION AND GET THE START TIME OF THIS PROCESS */
 	// set the system clock resolution to 10 us
 #ifdef __QNX__
+/*
 	new.nsec=10000;
 	new.fract=0;
 	temp=ClockPeriod(CLOCK_REALTIME,&new,0,0);
 	if(temp==-1) 	perror("Unable to change system clock resolution");
+*/
 	temp=ClockPeriod(CLOCK_REALTIME,0,&old,0);
 	if(temp==-1) 	perror("Unable to read sytem time");
 	CLOCK_RES=old.nsec;
@@ -574,7 +596,8 @@ int main(int argc, char **argv){
 
         printf("Entering Main loop\n");
     // OPEN TCP SOCKET AND START ACCEPTING CONNECTIONS 
-	sock=tcpsocket(RECV_HOST_PORT);
+	//sock=tcpsocket(RECV_HOST_PORT);
+	sock=server_unixsocket("rosrecv",0);
 	listen(sock, 5);
 	while (1) {
                 fflush(stdout);
@@ -653,7 +676,7 @@ int main(int argc, char **argv){
                         c=client.channel-1; 
                         if(ifmode) {
                           client.rfreq=(-SAMPLE_FREQ+IF_FREQ); 
-                          printf("Setting IF recv freq: %d %d %d\n",SAMPLE_FREQ,IF_FREQ,client.rfreq);  
+                          if(verbose > 1 ) printf("Setting IF recv freq: %d %d %d\n",SAMPLE_FREQ,IF_FREQ,client.rfreq);  
                         }
                         if ((ready_index[r][c]>=0) && (ready_index[r][c] <maxclients) ) {
                           clients[ready_index[r][c]]=client;
@@ -671,7 +694,7 @@ int main(int argc, char **argv){
                         gettimeofday(&t1,NULL);
                         elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t1.tv_usec-t0.tv_usec);
-                        if (verbose > 0) printf("  Receiver Client Ready Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 1) printf("  Receiver Client Ready Elapsed Microseconds: %ld\n",elapsed);
                         if (verbose > 1)  printf("Ending Client Ready Setup\n");
                         break; 
 
@@ -682,12 +705,13 @@ int main(int argc, char **argv){
                           if(IMAGING){ 
 			    if(verbose > 0 ) printf("Set up card parameters for Imaging:\n");	
                             for(card=0;card<MAX_CARDS;card++) { 
+                              gc314SetExternalTrigger(gc314fs[card], GC314_OFF);
 			      for(i=0;i<numclients;i++){
                                 r=clients[i].radar-1; 
                                 c=clients[i].channel-1; 
                                 b=0; 
-			        if(verbose > 0 ) printf("  Card %d client: %d r: %d c: %d\n",card,i,r,c);	
-			        if(verbose > 0 ) printf("    filters %d %d\n", (int) clients[i].filter_bandwidth,clients[i].match_filter);	
+			        if(verbose > 1 ) fprintf(stdout,"  Card %d client: %d r: %d c: %d\n",card,i,r,c);	
+			        if(verbose > 1 ) fprintf(stdout,"    rfreq: %d filters %d %d\n", (int) clients[i].rfreq,(int) clients[i].filter_bandwidth,clients[i].match_filter);	
                                 gc314SetFilters(gc314fs[card], (int) clients[i].filter_bandwidth, c, clients[i].match_filter);  
                                 gc314SetOutputRate(gc314fs[card], (double) clients[i].baseband_samplerate, c);  
                                 gc314SetFrequency(gc314fs[card], clients[i].rfreq*1000, c); 
@@ -695,7 +719,6 @@ int main(int argc, char **argv){
                                 gc314SetSamples(gc314fs[card], clients[i].number_of_samples+RECV_SAMPLE_HEADER, c); 
                               } //end of client loop
                             }  // end of card loop 
-                            gc314SetExternalTrigger(gc314fs[SYNC_MASTER], GC314_ON);
                             //for(card=0;card<MAX_CARDS;card++) gc314SetSyncMask(gc314fs[card], SYNC1_SIA_ONETIME);
 			    for(card=0;card<MAX_CARDS;card++) gc314SetSyncMask(gc314fs[card], SYNC1_SIA_HOLD);                          
                             gc314SetSync1(gc314fs[SYNC_MASTER], GC314_ON); 
@@ -725,6 +748,7 @@ int main(int argc, char **argv){
                               gc314SetSyncMask(gc314fs[card], SYNC1_RTSC_CLEAR);
                               gc314StartCollection(gc314fs[card]);
                             }
+                            gc314SetExternalTrigger(gc314fs[SYNC_MASTER], GC314_ON);
                           } else { 
                             for(card=0;card<MAX_CARDS;card++) 
                               gc314SetExternalTrigger(gc314fs[card], GC314_OFF);
@@ -733,6 +757,8 @@ int main(int argc, char **argv){
                               c=clients[i].channel-1; 
                               card=r;
                               b=0; 
+			      if(verbose > 1 ) fprintf(stdout,"  Non-Imaging client: %d r: %d c: %d\n",i,r,c);	
+			      if(verbose > 1 ) fprintf(stdout,"    rfreq: %d filters %d %d\n", (int) clients[i].rfreq,(int) clients[i].filter_bandwidth,clients[i].match_filter);	
 			      gc314SetFilters(gc314fs[card], (int) clients[i].filter_bandwidth, c, clients[i].match_filter);
 			      gc314SetOutputRate(gc314fs[card], (double) clients[i].baseband_samplerate, c);
 			      gc314SetFrequency(gc314fs[card], clients[i].rfreq*1000, c);
@@ -789,6 +815,7 @@ int main(int argc, char **argv){
                         elapsed+=(t1.tv_usec-t0.tv_usec);
                         if (verbose > 0) printf("  Receiver Pre-trigger Elapsed Microseconds: %ld\n",elapsed);
                         if (verbose > 1)  printf("Ending Pretrigger Setup\n");
+                        gettimeofday(&tpre,NULL);
                         break; 
 
 		      case RECV_POSTTRIGGER:
@@ -801,11 +828,12 @@ int main(int argc, char **argv){
                             ready_index[r][c]=-1;
                           }
                         }
+/*
                         for(card=0;card<MAX_CARDS;card++) {
                            if(verbose > 0 ) printf("Setup external trigger on card %d\n",card);
                            gc314SetExternalTrigger(gc314fs[card], GC314_OFF);
                         }
-
+*/
                         msg.status=0;
                         rval=send_data(msgsock, &msg, sizeof(struct DriverMsg));
                         gettimeofday(&t1,NULL);
@@ -817,7 +845,7 @@ int main(int argc, char **argv){
 //JDS : Pick up here
 		      case RECV_GET_DATA:
                         gettimeofday(&t0,NULL);
-			if(verbose > 1 ) printf("Receiver get datai %d\n",configured);	
+			if(verbose > 1 ) printf("Receiver get data %d\n",configured);	
 		        rval=recv_data(msgsock,&client,sizeof(struct ControlPRM));
                         r=client.radar-1; 
                         c=client.channel-1; 
@@ -836,7 +864,6 @@ int main(int argc, char **argv){
                               if (verbose > 1 ) printf("%d ",wait_status);
                               if(wait_status!=0) status=wait_status;
                             }
-                            printf("\n");
                           }
  
                           gettimeofday(&t1,NULL);
@@ -898,12 +925,16 @@ int main(int argc, char **argv){
                         msg.status=status;
                         rval=send_data(msgsock, &msg, sizeof(struct DriverMsg));
                         gettimeofday(&t2,NULL);
+                        gettimeofday(&tpost,NULL);
                         elapsed=(t2.tv_sec-t1.tv_sec)*1E6;
                         elapsed+=(t2.tv_usec-t1.tv_usec);
                         if (verbose > 1) printf("  Receiver Data Post Process Elapsed Microseconds: %ld\n",elapsed);
                         elapsed=(t2.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t2.tv_usec-t0.tv_usec);
                         if (verbose > 1) printf("  Receiver Get Data Elapsed Microseconds: %ld\n",elapsed);
+                        elapsed=(tpost.tv_sec-tpre.tv_sec)*1E6;
+                        elapsed+=(tpost.tv_usec-tpre.tv_usec);
+                        if (verbose > 1) printf("  Receiver PreTrig to Get Data finish Elapsed Microseconds: %ld\n",elapsed);
                         if (verbose > 1)  printf("Ending Get Data\n");
                         break;
 
@@ -924,24 +955,17 @@ int main(int argc, char **argv){
 			if(verbose > 1 ) printf("    nave:  %d %d\n",nave,clrfreq_parameters.nave);	
                         usable_bandwidth=floor(usable_bandwidth/2)*2 ;
 /*
-*  Set up fft collection settings using lab tested safe limits.
-*/  
-
-/*  1 kHz fft bins are assumed */
-
-/*  First the number of points to collect is padded by a factor of 1.25 to account for digital filter rolloff
-*    so the resulting fft information is taken from a usable central bandwidth which matches requested search bandwidth
-*    with flat response not convoluted with filter rolloff.
-*  Next limit maximum number of points collected to 1024 and adjust usable central bandwidth accordingly 
-*    if requested number of points is exceeded.
+*  Set up fft variables
 */
                         N=(int)pow(2,ceil(log10(1.25*(float)usable_bandwidth)/log10(2)));
                         if(N>1024){
                           N=512;
+                          usable_bandwidth=300;
+                          start=(int)(centre-usable_bandwidth/2+0.49999);
+                          end=(int)(centre+usable_bandwidth/2+0.49999);
                         }
-			/* Maximize usable_bandwidth for fft which is devoid of filter roll-off effects */
-                        usable_bandwidth=N/1.3;  
-                        /* set up search parameters search_bandwidth > usable_bandwidth  */
+/* 1 kHz fft boundaries*/
+                        /* set up search parameters search_bandwidth > usable_bandwidth */
                         search_bandwidth=N;            
                         //search_bandwidth=800;            
                         start=(int)(centre-search_bandwidth/2.0+0.49999);
@@ -976,7 +1000,7 @@ int main(int argc, char **argv){
                         }
 
                        msg.status=1;
-                       clrfreq_parameters.nave=4;
+                       if (clrfreq_parameters.nave > 10 ) clrfreq_parameters.nave=10;
                        nave=clrfreq_parameters.nave;
                        ii=0;
 #ifdef __QNX__
@@ -987,8 +1011,8 @@ int main(int argc, char **argv){
                            c=0;
                            b=0; 
                            for(try=0;try<max_retries;try++) {
-                             fprintf(stderr,"Trying CLR %d\n",try);
-                             fflush(stderr);
+                             //fprintf(stderr,"Trying CLR %d\n",try);
+                             //fflush(stderr);
                              if(IMAGING){  
                                 for(card=0;card<MAX_CARDS;card++) { 
                                   gc314SetFilters(gc314fs[card], (int) search_bandwidth*1000, c,0); 
@@ -1096,7 +1120,7 @@ int main(int argc, char **argv){
                             msg.status=-1;
                          }
 #endif
-                         printf("  Reciever:: CLRFREQ: averaging msg_status: %d\n",msg.status);
+                         //printf("  Reciever:: CLRFREQ: averaging msg_status: %d\n",msg.status);
                          for(ii=0;ii<nave;ii++) {
                            for (j=0;j<N;j++) {
 #ifdef __QNX__

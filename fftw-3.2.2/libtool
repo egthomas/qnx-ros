@@ -2,7 +2,7 @@
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status (fftw) 3.2.2
-# Libtool was configured on host localhost:
+# Libtool was configured on host dyn-137-229-27-247.net.gi.alaska.edu:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -65,13 +65,13 @@ fast_install=needless
 
 # The host system.
 host_alias=
-host=i386-pc-nto-qnx6.4.1
-host_os=nto-qnx6.4.1
+host=i386-pc-nto-qnx6.5.0
+host_os=nto-qnx6.5.0
 
 # The build system.
 build_alias=
-build=i386-pc-nto-qnx6.4.1
-build_os=nto-qnx6.4.1
+build=i386-pc-nto-qnx6.5.0
+build_os=nto-qnx6.5.0
 
 # A sed program that does not truncate output.
 SED="/usr/bin/sed"
@@ -89,7 +89,7 @@ EGREP="/usr/bin/grep -E"
 FGREP="/usr/bin/grep -F"
 
 # A BSD- or MS-compatible name lister.
-NM="/usr/qnx641/host/qnx6/x86/usr/bin/nm -B"
+NM="/usr/qnx650/host/qnx6/x86/usr/bin/nm -B"
 
 # Whether we need soft or hard links.
 LN_S="ln -s"
@@ -240,7 +240,7 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/usr/qnx641/host/qnx6/x86/usr/lib/gcc/i386-pc-nto-qnx6.4.0/4.3.3"
+sys_lib_search_path_spec="/usr/qnx650/host/qnx6/x86/usr/lib/gcc/i486-pc-nto-qnx6.5.0/4.4.2"
 
 # Run-time system search path for libraries.
 sys_lib_dlsearch_path_spec="/lib /usr/lib"
@@ -260,7 +260,7 @@ striplib="strip --strip-unneeded"
 
 
 # The linker used to build libraries.
-LD="/usr/qnx641/host/qnx6/x86/usr/bin/ntox86-ld"
+LD="/usr/qnx650/host/qnx6/x86/usr/bin/ntox86-ld"
 
 # Commands used to build an old-style archive.
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"

@@ -21,7 +21,7 @@ void *timeout_handler(void *arg)
    struct Thread_List_Item *thread_list,*thread_item,*thread_next;
    struct ControlProgram *data;
    struct timeval t1;
-   unsigned long elapsed;
+   long elapsed;
    int i,cancelled;
    struct ControlProgram *cprog;
 /* set the cancellation parameters --
@@ -31,18 +31,26 @@ void *timeout_handler(void *arg)
    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
    pthread_cleanup_push(timeout_exit,NULL);
-
+   fprintf(stdout,"Setting up thread for dead clients\n");
+   fflush(stdout);
    while (1) {
-     //logger(&exit_lock_buffer,PRE,LOCK, "timeout_elapsed_thread_search",-3,-3,0);
      pthread_mutex_lock(&exit_lock);  //hold the exit lock
-     //logger(&exit_lock_buffer,POST,LOCK,"timeout_elapsed_thread_search ",-3,-3,0);
      gettimeofday(&t1,NULL);
+     if (verbose > 1 ) {
+       fprintf(stdout,"Checking for dead clients: %d.%d\n",(int)t1.tv_sec,(int)t1.tv_usec);
+       fflush(stdout);
+       fprintf(stderr,"Checking for dead clients: %d.%d\n",(int)t1.tv_sec,(int)t1.tv_usec);
+       fflush(stderr);
+     }
      thread_list=controlprogram_threads;
      while(thread_list!=NULL){
        cancelled=0;
-       elapsed=t1.tv_sec-thread_list->last_seen.tv_sec;
+       elapsed=(long)t1.tv_sec-(long)thread_list->last_seen.tv_sec;
+       if (elapsed < 0) elapsed=0;
+       if (verbose > 1 ) fprintf(stdout,"TIMEOUT: %p elapsed: %ld timeout: %d\n",thread_list->data,elapsed,thread_list->timeout.tv_sec);
+       fflush(stdout);
        if (elapsed > thread_list->timeout.tv_sec) {
-         if (verbose > -1 ) fprintf(stderr,"TIMEOUT: elapsed time! %d %d\n",elapsed,thread_list->timeout.tv_sec);
+         if (verbose > -1 ) fprintf(stderr,"TIMEOUT: elapsed time! %ld %d\n",elapsed,thread_list->timeout.tv_sec);
          if (verbose > -1 ) fprintf(stderr,"  controlprogram addr: %p thread addr: %p id: %p\n",
                                    thread_list->data,thread_list,thread_list->id);
          if (verbose> 0) fprintf(stderr,"    thread next: %p\n",thread_list->next);
@@ -53,24 +61,22 @@ void *timeout_handler(void *arg)
            if (verbose>0) fprintf(stderr,"    control state: %p\n",cprog->state);
            if(cprog->state!=NULL) {      
              cancelled=cprog->state->cancelled; 
-             if (verbose>0) fprintf(stderr,"    control cancelled: %d\n",cancelled);
-             if (verbose > 0) fprintf(stderr,"controlprogram thread %p %p over ran timeout...trying to cancel\n",
+             if (verbose > -1) fprintf(stderr,"    control cancelled: %d\n",cancelled);
+             if (verbose > -1) fprintf(stderr,"controlprogram thread %p %p over ran timeout...trying to cancel\n",
                                    thread_list,thread_list->id);
              if(cancelled==0) {
-                 //logger(&exit_lock_buffer,PRE,UNLOCK, "timeout_thread_cancel",-3,-3,0);
                  pthread_mutex_unlock(&exit_lock);  //unlock exit lock
-                 //logger(&exit_lock_buffer,POST,UNLOCK, "timeout_thread_cancel",-3,-3,0);
                  if (verbose > -1 ) fprintf(stderr,"TIMEOUT: Canceling client thread %p %d\n",thread_list, thread_list->id);
                  pthread_cancel(thread_list->id);       
                  pthread_join(thread_list->id,NULL);
-                 //logger(&exit_lock_buffer,PRE,LOCK, "timeout_thread_cancel",-3,-3,0);
                  pthread_mutex_lock(&exit_lock);  //hold the exit lock
-                 //logger(&exit_lock_buffer,POST,LOCK, "timeout_thread_cancel",-3,-3,0);
              } else {
+                 if (verbose > -1 ) fprintf(stderr,"TIMEOUT: Client set as cancelled thread %p %d\n",thread_list, thread_list->id);
              }
            } else {
            } 
          }
+         fflush(stderr);
          if (verbose> 1) fprintf(stderr,"    Adjusting thread list\n");
          thread_item=thread_list;   
          thread_next=thread_item->next;
@@ -93,14 +99,12 @@ void *timeout_handler(void *arg)
      while(thread_list!=NULL){
        thread_list=thread_list->prev;
      }
-     //logger(&exit_lock_buffer,PRE,UNLOCK, "timeout_elapsed_thread_search",-3,-3,0);
      pthread_mutex_unlock(&exit_lock);  //unlock exit lock
-     //logger(&exit_lock_buffer,POST,UNLOCK, "timeout_elapsed_thread_search",-3,-3,0);
      pthread_testcancel();
      sleep(5);
      
    }
-   if (verbose > -1 ) fprintf(stderr,"timeout handler: outside of While Loop\n");
+   if (verbose > 1 ) fprintf(stderr,"timeout handler: outside of While Loop\n");
    pthread_cleanup_pop(0);
    timeout_exit(NULL);
    pthread_exit(NULL);

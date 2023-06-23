@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <stdint.h>
 #include <sys/time.h>
 #include "tsg.h"
 #include "control_program.h"
@@ -8,23 +9,9 @@
 #define _GLOBAL_SERVER_H
 
 
-#define SITE_NAME "kod"
+#define SITE_NAME "azr"
 
-#define EAST 1
-#define SITE_NAME_EAST "fhe"
-#define BOR_EAST 45
-#define ALT_EAST 673.534
-#define LAT_EAST +38.859
-#define LON_EAST -99.389
-
-#define WEST 2
-#define SITE_NAME_WEST "fhw"
-#define BOR_WEST -25 
-#define ALT_WEST 673.534
-#define LAT_WEST +38.859
-#define LON_WEST -99.389
-
-#define SITE_DIR "/root/site_data/"
+#define SITE_DIR "/root/operational_radar_code/site_data/"
 //#define SITE_DIR "/tmp/site_data/"
 
 #define IF_ENABLED         0 
@@ -74,6 +61,7 @@ typedef struct _fft_index{
 	double freq;
 	double detrend;
 	int index;
+	int valid;
 } t_fft_index;
 
 struct Thread_List_Item {
@@ -123,10 +111,10 @@ struct ControlProgram {
      struct CLRFreqPRM clrfreqsearch; 
      struct ControlPRM *parameters;
      struct RadarPRM *radarinfo;
-     uint32 *main;
-     uint64 main_address;
-     uint32 *back;
-     uint64 back_address;
+     uint32_t *main;
+     uint64_t main_address;
+     uint32_t *back;
+     uint64_t back_address;
      int active;
 };
 
@@ -140,7 +128,7 @@ struct BlackList {
 // ros state variables
      int start;
      int end;
-     unsigned int program;
+     uint64_t program;
 };
 #define TIMING_REGISTER_SEQ '+'
 #define DDS_REGISTER_SEQ '+'
@@ -149,8 +137,6 @@ struct BlackList {
 #define DDS_CtrlProg_READY '1'
 #define RECV_CtrlProg_READY '1'
 #define TIMING_CtrlProg_READY '1'
-
-#define DIO_TABLE_SETTINGS 'T'
 
 #define DIO_CtrlProg_END '@'
 #define DDS_CtrlProg_END '@'
@@ -184,6 +170,8 @@ struct BlackList {
 #define RECV_RXFE_SETTINGS 'R'
 #define DIO_RXFE_SETTINGS 'R'
 
+#define DIO_TABLE_SETTINGS 'T'
+
 #define GPS_GET_SOFT_TIME 't'
 #define GPS_GET_HDW_STATUS 'S'
 #define GPS_GET_EVENT_TIME 'e'
@@ -193,7 +181,6 @@ struct BlackList {
 #define GPS_SET_TRIGGER_RATE 'R'
 #define GPS_MSG_ERROR 'X'
 
-#define REFRESHRATE	1
 #define MAX_ERROR 0.002
 #define TIME_INTERVAL	100000000
 
@@ -215,9 +202,9 @@ struct FreqTable {
 };
 
 struct tx_status {
-  int32 LOWPWR[MAX_TRANSMITTERS];
-  int32 AGC[MAX_TRANSMITTERS];
-  int32 status[MAX_TRANSMITTERS];
+  int32_t LOWPWR[MAX_TRANSMITTERS];
+  int32_t AGC[MAX_TRANSMITTERS];
+  int32_t status[MAX_TRANSMITTERS];
 };
 
 

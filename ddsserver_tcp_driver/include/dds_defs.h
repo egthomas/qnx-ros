@@ -29,7 +29,6 @@
 // 2010-11-05 Fort Hays { East, West 1.46 Vpp } adjusted  at Transmitters inputs
 //#define DDS_MAX_RADAR_OUTPUT { 18903,22477  }
 // 2011-03-08 Adjusted to { 1.8 Vpp East, 1.6 Vpp West } TX output 400-600 W_peak at 15 MHz --KTS
-//#define DDS_MAX_RADAR_OUTPUT { 28355,30355 }
-#define DDS_MAX_RADAR_OUTPUT { 28355,26500 }
+#define DDS_MAX_RADAR_OUTPUT { 28355,30355 }
 
 #endif

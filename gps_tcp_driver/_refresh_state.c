@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
@@ -331,7 +332,7 @@ void * refresh_state(void *arg){
         temp=clock_gettime(CLOCK_REALTIME,&start);
 	while(1){	
           temp=clock_gettime(CLOCK_REALTIME,&stop);
-          if( (stop.tv_sec-start.tv_sec) >= REFRESHRATE && configured ){
+          if( (stop.tv_sec-start.tv_sec) >= GPS_DEFAULT_REFRESHRATE && configured ){
             pthread_mutex_lock(&gps_state_lock);
             get_state();
             pthread_mutex_unlock(&gps_state_lock);

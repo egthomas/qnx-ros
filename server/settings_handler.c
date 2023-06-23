@@ -41,21 +41,22 @@ void *settings_parse_ini_file(struct SiteSettings *ros_settings) {
      sprintf(ros_settings->beam_table_2,iniparser_getstring(Site_INI,"beam_lookup_table:beam_table_2",""));
 
      trigger_type=iniparser_getint(Site_INI,"site_settings:trigger_type",0);
-     fprintf(stdout,"Trigger_type: %d\n",trigger_type);
+     fprintf(stdout,"Trigger_type: %d\n",trigger_type); 
      switch(trigger_type) {
        case 0:
          gpsrate=0;
          gpsrate=iniparser_getint(Site_INI,"gps:trigger_rate",GPS_DEFAULT_TRIGRATE);
-         fprintf(stdout,"GPSrate: %d\n",gpsrate);
+         fprintf(stdout,"GPSrate: %d\n",gpsrate); 
          break;
        case 1:
        case 2:
          gpsrate=iniparser_getint(Site_INI,"gps:trigger_rate",GPS_DEFAULT_TRIGRATE);
-         fprintf(stdout,"GPSrate: %d\n",gpsrate);
+         fprintf(stdout,"GPSrate: %d\n",gpsrate); 
          break;
        default:
          break;
      }
+
 
      sprintf(ros_settings->name,"%s",iniparser_getstring(Site_INI,"site_settings:name",SITE_NAME));
      sprintf(entry_value,"%s",iniparser_getstring(Site_INI,"beam_lookup_table:use_table","ERROR"));
@@ -130,4 +131,6 @@ void *settings_rxfe_update_if(struct RXFESettings *rxfe_if_settings)
   pthread_mutex_unlock(&settings_lock);
   pthread_exit(NULL);
 }
+
+
 

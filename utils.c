@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
@@ -40,10 +41,10 @@ int opentcpsock(char *hostip, int port){
 	}
 	memcpy(&server.sin_addr, hp->h_addr, hp->h_length);
 	server.sin_port=htons(port);
-	temp=connect(sock, (struct sockaddr *)&server, sizeof(server));
+	temp=connect(sock, (struct sockaddr *)&server, (socklen_t) sizeof(server));
 	if( temp < 0){
 		perror("connecting stream socket");
-		return -1;
+		sock=-1;
 	}
 
 
@@ -68,6 +69,76 @@ int opentcpsock(char *hostip, int port){
     return sock;
 }
 
+int server_unixsocket(char *hostip,int port){
+
+	char	path[256];
+	int	sock,len,temp;
+	struct	sockaddr_un	saun;
+	int	option,optionlen;
+
+
+    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+        perror("server: socket");
+        exit(1);
+    }
+
+    saun.sun_family = AF_UNIX;
+    sprintf(path,"%s:%d",hostip,port);
+
+    strcpy(saun.sun_path, path);
+    fprintf(stdout,"Unix Path: %s\n",path);
+    unlink(path);
+    len = sizeof(saun.sun_family) + strlen(saun.sun_path);
+
+    if (bind(sock, (struct sockaddr *)&saun, len) < 0) {
+        perror("server: bind");
+        exit(1);
+    }
+	optionlen=4;
+	option=32768;
+	temp=setsockopt(sock,SOL_SOCKET,SO_SNDBUF,&option,optionlen);
+	temp=getsockopt(sock,SOL_SOCKET,SO_SNDBUF,&option,&optionlen);
+	optionlen=4;
+	option=32768;
+	temp=setsockopt(sock,SOL_SOCKET,SO_RCVBUF,&option,optionlen);
+	temp=getsockopt(sock,SOL_SOCKET,SO_RCVBUF,&option,&optionlen);
+
+	/* return the socket */
+	return sock;
+}
+
+int openunixsock(char *hostip, int port){
+	//DECLARE VARIABLES FOR IP CONNECTIONS
+	char	path[256];
+	int	sock,len,temp;
+	struct	sockaddr_un	saun;
+	int	option,optionlen;
+
+        if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+	  perror("opening unix domain stream socket");
+          exit(1);
+        }
+	saun.sun_family=AF_UNIX;
+	sprintf(path,"%s:%d",hostip,port);
+        strcpy(saun.sun_path, path);
+        unlink(path);
+        len = sizeof(saun.sun_family) + strlen(saun.sun_path);
+        if (connect(sock,(struct sockaddr *) &saun,(socklen_t) len) < 0) {
+          perror("client: connect");
+          sock=-1;
+        }
+
+	optionlen=4;
+	option=32768;
+	temp=setsockopt(sock,SOL_SOCKET,SO_SNDBUF,&option,optionlen);
+	temp=getsockopt(sock,SOL_SOCKET,SO_SNDBUF,&option,&optionlen);
+	optionlen=4;
+	option=32768;
+	temp=setsockopt(sock,SOL_SOCKET,SO_RCVBUF,&option,optionlen);
+	temp=getsockopt(sock,SOL_SOCKET,SO_RCVBUF,&option,&optionlen);
+
+    return sock;
+}
 int send_data(int fd,void  *buf,size_t buflen)
 {
      int cc=0,total=0;

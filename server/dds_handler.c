@@ -31,8 +31,7 @@ void *dds_register_seq(void *arg)
   index=control_program->parameters->current_pulseseq_index;
   send_data(ddssock, &index, sizeof(index)); //requested index
   send_data(ddssock,control_program->state->pulseseqs[index], sizeof(struct TSGbuf)); // requested pulseseq
-/* JDS : 20121017 : TSGprm is deprecated and should not be used */
-/*  send_data(ddssock,control_program->state->pulseseqs[index]->prm, sizeof(struct TSGprm)); // requested pulseseq */
+
   send_data(ddssock,control_program->state->pulseseqs[index]->rep, 
     sizeof(unsigned char)*control_program->state->pulseseqs[index]->len); // requested pulseseq
   send_data(ddssock,control_program->state->pulseseqs[index]->code, 

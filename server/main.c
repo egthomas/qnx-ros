@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/un.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
@@ -13,8 +14,6 @@
 #include "control_program.h"
 #include "client_handler.h"
 #include "timeout_handler.h"
-#include "log_handler.h"
-#include "status_handler.h"
 #include "settings_handler.h"
 #include "dio_handler.h"
 #include "dds_handler.h"
@@ -45,24 +44,26 @@ int recvsock=-1;
 
 /* Thread Management Global Variables */
 struct Thread_List_Item *controlprogram_threads;
-pthread_mutex_t controlprogram_list_lock,ros_state_lock,coord_lock,exit_lock,clr_lock;
+pthread_mutex_t controlprogram_list_lock,ros_state_lock,coord_lock,exit_lock;
 pthread_mutex_t dds_comm_lock,timing_comm_lock,gps_comm_lock,timing_comm_lock,recv_comm_lock,dio_comm_lock;
 pthread_mutex_t thread_list_lock,settings_lock;
 pthread_cond_t ready_flag;
-pthread_t status_thread=NULL,timeout_thread=NULL,log_thread=NULL;
+pthread_t timeout_thread=NULL;
 
 /* State Global Variables */
 dictionary *Site_INI;
 void *radar_channels[MAX_RADARS*MAX_CHANNELS];
-int *trigger_state_pointer, trigger_type;
-int *ready_state_pointer,*ready_count_pointer;
+int *trigger_state_pointer,trigger_type;
+int *ready_state_pointer;
 struct tx_status txstatus[MAX_RADARS];
 int txread[MAX_RADARS];
 struct SiteSettings site_settings;
 struct GPSStatus gpsstatus;
 struct TRTimes bad_transmit_times;
 int32 gpsrate=GPS_DEFAULT_TRIGRATE;
-int verbose=1;
+int verbose=0;
+
+struct timeval t_pre_start,t_pre_end,t_ready_first,t_ready_final,t_post_start,t_post_end;
 
 int clear_frequency_request;
 struct BlackList *blacklist=NULL;
@@ -85,6 +86,7 @@ void graceful_cleanup(int signum)
   struct ControlProgram *data;
   
   if (verbose>-1) fprintf(stderr,"Attempting graceful clean up of control program threads\n");
+  fflush(stdout); 
   thread_list=controlprogram_threads;
   t=0;
   if (thread_list!=NULL) {
@@ -96,9 +98,7 @@ void graceful_cleanup(int signum)
       pthread_join(thread_list->id,NULL);
       if (verbose>0) fprintf(stderr,"Done Joining thread %ld\n",t);
 
-        //logger(&controlprogram_list_lock_buffer,PRE,LOCK,"main_graceful_cleanup",-1,-1,0);
       pthread_mutex_lock(&controlprogram_list_lock);
-        //logger(&controlprogram_list_lock_buffer,POST,LOCK,"main_graceful_cleanup",-1,-1,0);
 
       thread_item=thread_list;   
       if (verbose>0) fprintf(stderr,"thread item %p\n",thread_item);
@@ -113,21 +113,11 @@ void graceful_cleanup(int signum)
         if (verbose>0) fprintf(stderr,"freed thread item\n");
         thread_item=NULL;
       }
-        //logger(&controlprogram_list_lock_buffer,PRE,UNLOCK,"main_graceful_cleanup",-1,-1,0);
       pthread_mutex_unlock(&controlprogram_list_lock);
-        //logger(&controlprogram_list_lock_buffer,POST,UNLOCK,"main_graceful_cleanup",-1,-1,0);
       t++;
     }
   }
   if (verbose>0) fprintf(stderr,"Done with control program threads now lets do worker threads\n");
-  if (status_thread!=NULL) {
-    if (verbose>0) fprintf(stderr,"Cancelling Status thread\n");
-    pthread_cancel(status_thread);       
-    if (verbose>0) fprintf(stderr,"  Status thread cancelled\n");
-    if (verbose>0) fprintf(stderr,"  Waiting for Status thread to end\n");
-    pthread_join(status_thread,NULL);
-    if (verbose>0) fprintf(stderr,"  Status thread done\n");
-  }
   if (timeout_thread!=NULL) {
     if (verbose>0) fprintf(stderr,"Cancelling Timeout thread\n");
     pthread_cancel(timeout_thread);
@@ -135,14 +125,6 @@ void graceful_cleanup(int signum)
     if (verbose>0) fprintf(stderr,"  joining Timeout thread\n");
     pthread_join(timeout_thread,NULL);
     if (verbose>0) fprintf(stderr,"  Back from joining Timeout thread\n");
-  }
-  if (log_thread!=NULL) {
-    if (verbose>0) fprintf(stderr,"Cancelling Log thread\n");
-    pthread_cancel(log_thread);
-    if (verbose>0) fprintf(stderr,"  Log thread cancelled\n");
-    if (verbose>0) fprintf(stderr,"  joining Log thread\n");
-    pthread_join(log_thread,NULL);
-    if (verbose>0) fprintf(stderr,"  Back from joining Log thread\n");
   }
   errno=ECANCELED;
   if (verbose>0) fprintf(stderr,"Done with worker threads now lets exit\t");
@@ -198,7 +180,29 @@ int main()
   char *s,*line,*field;
   int dfrq=13000;
 /* end DIO */
+  int policy;
+  struct sched_param sp;
 
+  fprintf(stdout,"Policy Options F: %d R:%d O:%d S: %d\n",SCHED_FIFO,SCHED_RR,SCHED_OTHER,SCHED_SPORADIC);
+  pthread_getschedparam(pthread_self(),&policy,&sp);
+  fprintf(stdout,"Policy %d Prio: %d\n",policy,sp.sched_priority);
+  sp.sched_priority = 60;
+  pthread_setschedparam(pthread_self(), SCHED_RR, &sp);
+  pthread_getschedparam(pthread_self(),&policy,&sp);
+  fprintf(stdout,"Policy %d Prio: %d\n",policy,sp.sched_priority);
+  fprintf(stdout,"Min Prio: %d Max Prio: %d\n",
+     sched_get_priority_min(SCHED_RR),
+     sched_get_priority_max(SCHED_RR));
+  fflush(stdout);
+
+
+
+  gettimeofday(&t_ready_first,NULL);
+  gettimeofday(&t_ready_final,NULL);
+  gettimeofday(&t_pre_start,NULL);
+  gettimeofday(&t_pre_end,NULL);
+  gettimeofday(&t_post_start,NULL);
+  gettimeofday(&t_post_end,NULL);
   controlprogram_list_lock_buffer = realloc(NULL, 1);
   strcpy(controlprogram_list_lock_buffer, "");
   exit_lock_buffer = realloc(NULL, 1);
@@ -207,7 +211,7 @@ int main()
   strcpy(coord_lock_buffer, "");
 
   printf("Size of Struct ROSMsg  %d\n",sizeof(struct ROSMsg));
-  printf("Size of Struct int32  %d\n",sizeof(int32));
+  printf("Size of Struct int32  %d\n",sizeof(int32_t));
   printf("Size of Struct float  %d\n",sizeof(float));
   printf("Size of Struct unsigned char  %d\n",sizeof(unsigned char));
   printf("Size of Struct ControlPRM  %d\n",sizeof(struct ControlPRM));
@@ -217,7 +221,7 @@ int main()
   printf("Size of Struct SiteSettings  %d\n",sizeof(struct SiteSettings));
 
   gettimeofday(&t0,NULL);
-  default_timeout.tv_sec=60;
+  default_timeout.tv_sec=15;
 /* Set up global CLR_Frequecy */
   max_freqs=(full_clr_end-full_clr_start);
   latest_full_clr_time=t0;
@@ -241,7 +245,6 @@ int main()
   pthread_mutex_init(&controlprogram_list_lock, NULL);
   pthread_mutex_init(&coord_lock, NULL);
   pthread_mutex_init(&exit_lock, NULL);
-  pthread_mutex_init(&clr_lock, NULL);
   pthread_mutex_init(&ros_state_lock, NULL);
   pthread_mutex_init(&timing_comm_lock, NULL);
   pthread_mutex_init(&dds_comm_lock, NULL);
@@ -257,10 +260,8 @@ int main()
   controlprogram_threads=NULL;
   clear_frequency_request=0;
   ready_state_pointer=malloc(sizeof(int));
-  ready_count_pointer=malloc(sizeof(int));
   trigger_state_pointer=malloc(sizeof(int));
   *ready_state_pointer=0; //no control programs ready
-  *ready_count_pointer=0; //no control programs ready
   *trigger_state_pointer=0; //pre-trigger state
   trigger_type=0; //strict control program ready trigger type
   for(i=0;i<MAX_RADARS*MAX_CHANNELS;i++) {
@@ -349,7 +350,7 @@ int main()
   site_settings.if_settings.att2=0;
   site_settings.if_settings.att3=0;
   site_settings.rf_settings.att4=0;
-  site_settings.use_beam_table=0;
+
   rc = pthread_create(&thread, NULL, (void *) &settings_parse_ini_file,(void *)&site_settings);
   pthread_join(thread,NULL);
   rc = pthread_create(&thread, NULL, (void *) &settings_rxfe_update_rf,(void *)&site_settings.rf_settings);
@@ -370,34 +371,39 @@ int main()
 
 /******************* TCP Socket Connection ***********/
   if (verbose>0) fprintf(stderr,"Opening DIO Socket %s %d\n",diohostip,dioport);
-  diosock=opentcpsock(diohostip, dioport);
+//  diosock=opentcpsock(diohostip, dioport);
+  diosock=openunixsock("rosdio", 0);
   if (diosock < 0) {
-    if (verbose>-1) fprintf(stderr,"Dio Socket failure %d\n",diosock);
-//    graceful_socket_cleanup(1);
+    if (verbose>0) fprintf(stderr,"Dio Socket failure %d\n",diosock);
+    //graceful_socket_cleanup(1);
   } else if (verbose>0) fprintf(stderr,"Dio Socket %d\n",diosock);
   if (verbose>0) fprintf(stderr,"Opening DDS Socket\n");
-  ddssock=opentcpsock(ddshostip, ddsport);
+  //ddssock=opentcpsock(ddshostip, ddsport);
+  ddssock=openunixsock("rosdds", 0);
   if (ddssock < 0) {
     if (verbose>0) fprintf(stderr,"DDS Socket failure %d\n",ddssock);
-    graceful_socket_cleanup(1);
+//    graceful_socket_cleanup(1);
   } else  if (verbose>0) fprintf(stderr,"DDS Socket %d\n",ddssock);
   if (verbose>0) fprintf(stderr,"Opening Recv Socket\n");
-  recvsock=opentcpsock(recvhostip, recvport);
+  //recvsock=opentcpsock(recvhostip, recvport);
+  recvsock=openunixsock("rosrecv", 0);
   if (recvsock < 0) {
     if (verbose>0)fprintf(stderr,"RECV Socket failure %d\n",recvsock);
-    graceful_socket_cleanup(1);
+//    graceful_socket_cleanup(1);
   } else  if (verbose>0) fprintf(stderr,"RECV Socket %d\n",recvsock);
   if (verbose>0) fprintf(stderr,"Opening Timing Socket\n");
-  timingsock=opentcpsock(timinghostip, timingport);
+  //timingsock=opentcpsock(timinghostip, timingport);
+  timingsock=openunixsock("rostiming", 0);
   if (timingsock < 0) {
     if (verbose>0) fprintf(stderr,"Timing Socket failure %d\n",timingsock);
-    graceful_socket_cleanup(1);
+//    graceful_socket_cleanup(1);
   } else  if (verbose>0) fprintf(stderr,"Timing Socket %d\n",timingsock);
   if (verbose>0) fprintf(stderr,"Opening GPS Socket\n");
-  gpssock=opentcpsock(gpshostip, gpsport);
+  //gpssock=opentcpsock(gpshostip, gpsport);
+  gpssock=openunixsock("rosgps", 0);
   if (gpssock < 0) {
     if (verbose>0) fprintf(stderr,"GPS Socket failure %d\n",gpssock);
-    graceful_socket_cleanup(1);
+//    graceful_socket_cleanup(1);
   } else {
     if (verbose>0) fprintf(stderr,"GPS Socket %d\n",gpssock);
     msg.type=GPS_SET_TRIGGER_RATE;
@@ -411,10 +417,9 @@ int main()
  * 
  */
 ///* Hdw Status handler */
-// rc = pthread_create(&status_thread, NULL, status_handler, NULL);
 /* Control Program Activity Timeout handler */
+
   rc = pthread_create(&timeout_thread, NULL, timeout_handler, NULL);
-//  rc = pthread_create(&log_thread, NULL, log_handler, NULL);
 
   rc = pthread_create(&thread, NULL, &receiver_rxfe_settings,(void *)&site_settings);
   pthread_join(thread,NULL);
@@ -457,11 +462,9 @@ int main()
          perror("arby server: accept error\n");
          exit(0);
        }
-       if (verbose > 1) fprintf(stdout,"ROS Main: New Client!\n");
        gettimeofday(&current_time,NULL);
-        //logger(&controlprogram_list_lock_buffer,PRE,LOCK,"main_client_connect",-1,-1,0);
+       if (verbose > -1) fprintf(stdout,"ROS Main: New Client! %d.%d\n",(int)current_time.tv_sec,(int)current_time.tv_usec);
        pthread_mutex_lock(&controlprogram_list_lock);
-        //logger(&controlprogram_list_lock_buffer,POST,LOCK,"main_client_connect",-1,-1,0);
        /* create and init new control program instance */
        control_program=control_init();
        control_program->state->socket=newsockfd;
@@ -500,9 +503,7 @@ int main()
          thread_list=thread_list->prev;
          num_threads++;
        }
-        //logger(&controlprogram_list_lock_buffer,PRE,UNLOCK,"main_client_connect",-1,-1,0);
        pthread_mutex_unlock(&controlprogram_list_lock);
-        //logger(&controlprogram_list_lock_buffer,POST,UNLOCK,"main_client_connect",-1,-1,0);
        /* the server is now free to accept another socket request */
      }
      if (verbose>-1) fprintf(stderr,"Too many Control Program Threads\n");

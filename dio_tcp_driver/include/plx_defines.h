@@ -3,8 +3,7 @@
 #define DEVICE_ID 0x0c78
 
 #define BEAMTABLE_DIR  "/tmp/"
-#define RADAR_NAME     "oregon"
-#define MAX_BEAM       23
+#define MAX_BEAM       32
 #define BEAMCODES      8192
 #define PA_GRP_0                0
 #define PB_GRP_0                1

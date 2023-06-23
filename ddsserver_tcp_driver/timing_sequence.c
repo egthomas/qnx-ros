@@ -18,9 +18,9 @@
 
 extern int verbose;
 //extern struct RXFESettings rxfe_settings;
-extern uint32 ifmode;
+extern uint32_t ifmode;
 
-int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM  *clients,int seqlength[MAX_RADARS][MAX_CHANNELS] ,int **client_seqs[MAX_RADARS][MAX_CHANNELS],int active[MAX_RADARS][DDS_MAX_CHANNELS],FILE *ics660[4])
+int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM  *clients,int seqlength[MAX_RADARS][MAX_CHANNELS] ,int *client_seqs[MAX_RADARS][MAX_CHANNELS],int active[MAX_RADARS][DDS_MAX_CHANNELS],FILE *ics660[4])
 {
   long SC,SO;
   int dds_nchan=16;
@@ -56,6 +56,7 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
   char trans_seq[200000];
   float t_seq_state;
   int flag;
+
 // Samples per channel on each trigger
 //JDS add an offset for zeros at the end...because of IF
   SO=max_seq_length+100.0E-6/STATE_TIME;
@@ -70,7 +71,7 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
       max_val[r][c]=max_val[r][1]/c;
     }
   }
-  if (verbose > -1) printf("Inside MSI timing sequence clients:%d SC: %d Max: %d\n",numclients,SC,max_seq_length);	
+  if (verbose > -1) fprintf(stdout,"Inside MSI timing sequence SC: %d Max: %d\n",SC,max_seq_length);	
 #ifdef __QNX__
   for( pci_ind=pci_min; pci_ind < DDS_MAX_CARDS; pci_ind ++) {
      status=ics660_init(ics660[pci_ind],pci_ind);
@@ -78,59 +79,52 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
 #endif
 
   for( r=0; r<MAX_RADARS; r++){
-    for( c=0; c<DDS_MAX_CHANNELS; c++){
-      active[r][c]=-1; 
-    }
     num_active_chans[r]=0;
+    for( c=0; c<MAX_CHANNELS; c++){
+      if (active[r][c]==c) { 
+        num_active_chans[r]++;
+      }
+    }
   } 
   data_ar = (uint32_t *)calloc((size_t)SC, (size_t)sizeof(uint32_t));
- // printf("ICS660_XMT SC = %d\n",SC);
-  for( j=0; j<numclients; j++){
-        r=clients[j].radar-1; 
-        c=clients[j].channel-1; 
-        active[r][c]=c; 
-        num_active_chans[r]++;
+  if (data_ar==NULL) {
+    fprintf(stderr,"data_ar is NULL: %p\n",data_ar);
+    fflush(stderr);
+    return 0;
   } 
-//  for (j=0;j<numclients; j++) {
-//    r=clients[j].radar-1;
-//    c=clients[j].channel-1;
-//    cc=0;
-//    for(i=DDS_MAX_CHANNELS/num_active_chans[r];i>0;i--) {
-//      if((active[r][cc]==-1) && (cc < DDS_MAX_CHANNELS))   active[r][cc]=c;
-//      cc++;
-//    }
-//    num_active_chans[r]=3;
-//  }
   if (verbose > -1) {
-   printf("  timing sequence active channels on each output:\n");
+   fprintf(stdout,"  timing sequence active channels on each output:\n");
    for( r=0; r<MAX_RADARS; r++){
-     printf("    radar %d   active: %d \n",r,num_active_chans[r]);
+     fprintf(stdout,"    radar %d   active: %d \n",r,num_active_chans[r]);
      for (c=0;c<DDS_MAX_CHANNELS;c++) {
-       printf("     chan : %d  val : %d\n",c,active[r][c]);
+       fprintf(stdout,"     chan : %d  val : %d\n",c,active[r][c]);
      }
    }
      
   }
-  for( j=0; j<numclients; j++){
-        if (verbose > 1) printf("Client Number :%d radar:%d channel:\n",j,clients[j].radar,clients[j].channel);
-        r=clients[j].radar-1; 
+  fflush(stdout);
+  
+  for( r=0; r<MAX_RADARS; r++){
+    for( c=0; c<MAX_CHANNELS; c++){
+      if(active[r][c]==c) {
         rr=r+2;
-        c=clients[j].channel-1; 
-        printf( "Radar: %d Active Number of channels: %d  Max Value: %hd %hx\n",r,num_active_chans[r],max_val[r][num_active_chans[r]],max_val[r][num_active_chans[r]]);
-        printf ("IF Signal radar: %d: Output: %d %d %d %d %d\n",r,rr,seqlength[r][c],max_seq_length,dds_nchan,DDS_MAX_CHANNELS);
-        if (verbose > 1) printf("r: %d c:%d count: %d\n",r,c,seqlength[r][c]);	
+        if (verbose > 0 ) {
+          fprintf(stdout, "Radar: %d Active Number of channels: %d  Max Value: %hd %hx\n",r,num_active_chans[r],max_val[r][num_active_chans[r]],max_val[r][num_active_chans[r]]);
+          fprintf (stdout,"IF Signal: radar: %d: Output: %d :: %d %d %d %d\n",r,rr,seqlength[r][c],max_seq_length,dds_nchan,DDS_MAX_CHANNELS);
+        }
         flag=0;
         for( i=0; i<seqlength[r][c]; i++){
           if (verbose > 1) {
             if (client_seqs[r][c][i]!=0 && flag==0) {
-              if (verbose > 1) printf("Beginning of TX: %d\n",i);
+              if (verbose > 1) fprintf(stdout,"Beginning of TX: %d\n",i);
               flag=1;
             }
             if (client_seqs[r][c][i]==0 && flag==1) {
-              if (verbose > 1) printf("End of TX: %d\n",i-1);
+              if (verbose > 1) fprintf(stdout,"End of TX: %d\n",i-1);
               flag=0;
             }
           }
+          fflush(stdout);
           ioff = i*dds_nchan;
           cc=0;
           while( cc < DDS_MAX_CHANNELS ) {
@@ -140,26 +134,48 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
                 ind = (ioff + dds_chan);
                 dac_value.samples.low = (short)client_seqs[r][c][i]*max_val[r][num_active_chans[r]];
                 dac_value.samples.high =(short)client_seqs[r][c][i]*max_val[r][num_active_chans[r]];
-                data_ar[ind] = (uint32_t) dac_value.two_samp;
+                if (ind < SC)
+                  data_ar[ind] = (uint32_t) dac_value.two_samp;
+                else { 
+                  if (dac_value.samples.low!=0 || dac_value.samples.high!=0) {
+                    fprintf(stderr,"Timing Sequence Error:: Index out of bounds\n");
+                    fprintf(stderr,"  ind: %d SC: %d data_ar: %p\n",ind,SC,data_ar);
+                    fprintf(stdout,"  r: %d c: %d i: %d num_active_chans[r]: %d\n",r,c,i,num_active_chans[r]);
+                    fprintf(stderr," DDS chan val: %d\n",cc);
+                    fprintf(stderr,"  low: %d high: %d\n",dac_value.samples.low,dac_value.samples.high);
+                    fflush(stderr);
+                  }
+                }
               } else {
-                //printf(" IMAGING: Active r: %d Index: %d\n",r,i);
+                //fprintf(stdout," IMAGING: Active r: %d Index: %d\n",r,i);
                 //IMAGING
                 for ( a=0;a<4;a++ ) {
                   dds_chan=a*DDS_MAX_CHANNELS+cc;
                   ind = (ioff + dds_chan);
                   dac_value.samples.low = (short)client_seqs[r][c][i]*max_val[r][num_active_chans[r]];
                   dac_value.samples.high =(short)client_seqs[r][c][i]*max_val[r][num_active_chans[r]];
-                  data_ar[ind] = (uint32_t) dac_value.two_samp;
+                  if (ind < SC)
+                    data_ar[ind] = (uint32_t) dac_value.two_samp;
+                  else {
+                    if (dac_value.samples.low!=0 || dac_value.samples.high!=0) {
+                      fprintf(stderr,"Imaging Timing Sequence Error:: Index out of bounds\n");
+                      fprintf(stderr,"  ind: %d SC: %d data_ar: %p\n",ind,SC,data_ar);
+                      fprintf(stdout,"  r: %d c: %d i: %d num_active_chans[r]: %d\n",r,c,i,num_active_chans[r]);
+                      fprintf(stderr," DDS chan val: %d\n",cc);
+                      fprintf(stderr,"  low: %d high: %d\n",dac_value.samples.low,dac_value.samples.high);
+                      fflush(stderr);
+                    }
+                  }
                 }
               }
             }
             cc++;
           }
         } //end sequence loop 
-        if (verbose > 1) printf("End of client\n");	
+        if (verbose > 1) fprintf(stdout,"End of client\n");	
         if (ifmode==1) {                                                 
           if(IMAGING==0) {
-            printf ("IF Signal radar: %d Output: %d %d %d %d %d\n",r,rr,seqlength[r][c],max_seq_length,dds_nchan,DDS_MAX_CHANNELS);
+            if (verbose > 0 ) fprintf (stdout,"IF Signal radar: %d Output: %d :: %d %d %d %d\n",r,rr,seqlength[r][c],max_seq_length,dds_nchan,DDS_MAX_CHANNELS);
             for( i=0; i<max_seq_length-1; i++){                               
               cc=0;  
               ioff = i*dds_nchan;
@@ -169,21 +185,28 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
               dac_value.samples.high =(short)1*if_val[r];                 
               if (ind < SC)
                 data_ar[ind] = (uint32_t) dac_value.two_samp;             
-              else printf("Index too big: %d %d\n",ind,SC);
+              else { 
+                  if (dac_value.samples.low!=0 || dac_value.samples.high!=0) {
+                    fprintf(stderr,"IF Timing Sequence Error:: Index out of bounds\n");
+                    fprintf(stderr,"  ind: %d SC: %d data_ar: %p\n",ind,SC,data_ar);
+                    fprintf(stdout,"  rr: %d cc: %d i: %d num_active_chans[r]: %d\n",rr,cc,i,num_active_chans[r]);
+                    fprintf(stderr," DDS chan val: %d\n",cc);
+                    fprintf(stderr,"  low: %d high: %d\n",dac_value.samples.low,dac_value.samples.high);
+                    fflush(stderr);
+                  }
+              }
             }                                                             
           } else {
             fprintf(stderr,"Error: IF cannot be enabled in IMAGING Mode\n");
           }
         }            
-      } // end of client loop
-
-      if (verbose > 1) printf("Inside MSI timing sequence 3\n");	
-    
-    
-  printf("timing seq is ready to be sent\n");
+      }
+    } // end of client loop
+  }
+  if (verbose > 0 ) fprintf(stdout,"timing seq is ready to be sent\n");
 #ifdef __QNX__
   for( pci_ind=pci_min; pci_ind < DDS_MAX_CARDS; pci_ind ++) {
-      printf("  pci_ind: %d\n",pci_ind);
+      if (verbose > 0 ) fprintf(stdout,"  pci_ind: %d\n",pci_ind);
       bank_length = SC/2-1;
       bank_width = 0;
       transmit_length = SC/2-1;
@@ -209,8 +232,8 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
         ics660_set_parameter((int)ics660[pci_ind],ICS660_RELEASE_RESETS, &enable, sizeof(enable));
 #endif
   free(data_ar);      
-  if (verbose > 1) printf("Leaving MSI timing sequence\n");	
-
+  if (verbose > 1) fprintf(stdout,"Leaving MSI timing sequence\n");	
+  fflush(stdout);
   return 0;
 
 }

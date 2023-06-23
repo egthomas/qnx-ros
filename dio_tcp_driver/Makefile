@@ -1,7 +1,7 @@
 OS:=$(shell uname -s)
 
 CC=gcc
-CFLAGS=-c -g
+CFLAGS=-c
 common_libs=-lm
 linux_libs=
 qnx_libs=-lsocket

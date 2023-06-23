@@ -27,16 +27,23 @@ int sock,msgsock;
 int verbose=0;
 int configured=1;
 uint32_t use_beam_table;
-int32_t num_freqs[MAX_RADARS],num_beamcodes[MAX_RADARS],num_fsteps[MAX_RADARS],foffset[MAX_RADARS];
-double *f_lo[MAX_RADARS],*f_hi[MAX_RADARS],*f_c[MAX_RADARS];
-int32_t *f_bmnum[MAX_RADARS];
+int32_t num_freqs[MAX_RADARS],max_angles[MAX_RADARS],num_angles[MAX_RADARS],num_beamcodes[MAX_RADARS],num_fsteps[MAX_RADARS],foffset[MAX_RADARS],num_cards[MAX_RADARS];
+double fstep[MAX_RADARS];		/* SGS: changed from int32_t to double */
+double f0[MAX_RADARS],fm[MAX_RADARS],df[MAX_RADARS];
+double *freqs[MAX_RADARS],*angles[MAX_RADARS];
+int32_t *final_beamcodes[MAX_RADARS][32],*final_attencodes[MAX_RADARS][32];
+double *final_freqs[MAX_RADARS][32],*final_angles[MAX_RADARS][32];
  
 void graceful_cleanup(int signum)
 {
+  char path[256];
   char *diohostip=DIO_HOST_IP;
   int dioport=DIO_HOST_PORT;
+  sprintf(path,"%s:%d","rosdio",0);
   close(msgsock);
   close(sock);
+  fprintf(stdout,"Unlinking Unix Socket: %s\n",path);
+  unlink(path);
   exit(0);
 }
 static unsigned char reverse_addr(unsigned char x) {
@@ -95,6 +102,15 @@ int main(){
 
         signal(SIGINT, graceful_cleanup);
         use_beam_table=0;
+        for (r=0;r<MAX_RADARS;r++){
+        freqs[r]=NULL;
+        angles[r]=NULL;
+        for(c=0;c<32;c++) {
+          final_beamcodes[r][c]=NULL;
+          final_attencodes[r][c]=NULL;
+          final_freqs[r][c]=NULL;
+          final_angles[r][c]=NULL;
+        }}
         for (r=0;r<MAX_RADARS;r++){
           for (c=0;c<MAX_CHANNELS;c++){
             ready_index[r][c]=-1;
@@ -197,8 +213,8 @@ int main(){
         //set_RXFE_EEPROM_address(IOBASE,0); 
 #endif
     // OPEN TCP SOCKET AND START ACCEPTING CONNECTIONS 
-	sock=tcpsocket(DIO_HOST_PORT);
-//	sock=server_unixsocket("rosdio",0);
+//	sock=tcpsocket(DIO_HOST_PORT);
+	sock=server_unixsocket("rosdio",0);
 
 	listen(sock, 5);
 
@@ -392,34 +408,55 @@ int main(){
       						  beamtablefile=fopen(filename,"r");
       						  if(beamtablefile!=NULL) {
                                                         fprintf(stdout,"Opened: %p\n",beamtablefile);
+						        fread(&num_freqs[r],sizeof(int32_t),1,beamtablefile);
+						        fread(&num_angles[r],sizeof(int32_t),1,beamtablefile);
+						        fread(&max_angles[r],sizeof(int32_t),1,beamtablefile);
 						        fread(&num_beamcodes[r],sizeof(int32_t),1,beamtablefile);
-						        fread(&foffset[r],sizeof(int32_t),1,beamtablefile);
 						        fread(&num_fsteps[r],sizeof(int32_t),1,beamtablefile);
-                                                        f_bmnum[r]=(int32_t *)malloc(sizeof(int32_t)*num_beamcodes[r]); 
-
-                                                        f_c[r]=malloc(sizeof(double)*num_beamcodes[r]); 
-                                                        f_lo[r]=malloc(sizeof(double)*num_beamcodes[r]); 
-                                                        f_hi[r]=malloc(sizeof(double)*num_beamcodes[r]); 
-
-						        fread(f_bmnum[r],sizeof(int32_t),num_beamcodes[r],beamtablefile);
-						        fread(f_c[r],sizeof(double),num_beamcodes[r],beamtablefile);
-						        fread(f_lo[r],sizeof(double),num_beamcodes[r],beamtablefile);
-						        fread(f_hi[r],sizeof(double),num_beamcodes[r],beamtablefile);
-
+						        /*fread(&fstep[r],sizeof(int32_t),1,beamtablefile);*/
+						        fread(&fstep[r],sizeof(double),1,beamtablefile);
+						        fread(&foffset[r],sizeof(int32_t),1,beamtablefile);
+						        fread(&f0[r],sizeof(double),1,beamtablefile);
+						        fread(&fm[r],sizeof(double),1,beamtablefile);
+						        fread(&num_cards[r],sizeof(int32_t),1,beamtablefile);
+                                                        if(freqs[r]!=NULL) free(freqs[r]);
+                                                        freqs[r]=malloc(sizeof(double)*num_freqs[r]); 
+						        fread(freqs[r],sizeof(double),num_freqs[r],beamtablefile);
+                                                        if(angles[r]!=NULL) free(angles[r]);
+                                                        angles[r]=malloc(sizeof(double)*num_angles[r]); 
+						        fread(angles[r],sizeof(double),num_angles[r],beamtablefile);
+						        for (c=0;c<num_cards[r];c++) { 
+                                                                if(final_beamcodes[r][c]!=NULL) free(final_beamcodes[r][c]);
+                                                                final_beamcodes[r][c]=malloc(sizeof(int32_t)*num_beamcodes[r]); 
+          							rval=fread(final_beamcodes[r][c],sizeof(int32_t),num_beamcodes[r],beamtablefile);
+                                                                if(final_attencodes[r][c]!=NULL) free(final_attencodes[r][c]);
+                                                                final_attencodes[r][c]=malloc(sizeof(int32_t)*num_beamcodes[r]); 
+          							rval=fread(final_attencodes[r][c],sizeof(int32_t),num_beamcodes[r],beamtablefile);
+                                                                if(final_freqs[r][c]!=NULL) free(final_freqs[r][c]);
+                                                                final_freqs[r][c]=malloc(sizeof(double)*num_beamcodes[r]); 
+          							rval=fread(final_freqs[r][c],sizeof(int32_t),num_beamcodes[r],beamtablefile);
+                                                                if(final_angles[r][c]!=NULL) free(final_angles[r][c]);
+                                                                final_angles[r][c]=malloc(sizeof(double)*num_beamcodes[r]); 
+          							rval=fread(final_angles[r][c],sizeof(int32_t),num_beamcodes[r],beamtablefile);
+        						}
                                                         fprintf(stdout,"Closing: %s\n",filename);
         						fclose(beamtablefile);
         						beamtablefile=NULL;
-/*
-                                                        for (b=0;b<num_beamcodes[r];b++) {
-                                                          fprintf(stdout,"R: %d %d Code: %d Beam %d F_c: %e\n",
-                                                            r,num_beamcodes[r],b,f_bmnum[r][b],f_c[r][b]);
-                                                        } 
-*/
       						  } else {
-                                                        if(f_bmnum[r]!=NULL) free(f_bmnum[r]); 
-                                                        if(f_c[r]!=NULL) free(f_c[r]); 
-                                                        if(f_lo[r]!=NULL) free(f_lo[r]); 
-                                                        if(f_hi[r]!=NULL) free(f_hi[r]); 
+                                                        if(freqs[r]!=NULL) free(freqs[r]);
+							freqs[r]=NULL;
+                                                        if(angles[r]!=NULL) free(angles[r]);
+							angles[r]=NULL;
+						        for (c=0;c<num_cards[r];c++) { 
+                                                                if(final_beamcodes[r][c]!=NULL) free(final_beamcodes[r][c]);
+								final_beamcodes[r][c]=NULL;
+                                                                if(final_attencodes[r][c]!=NULL) free(final_attencodes[r][c]);
+								final_attencodes[r][c]=NULL;
+                                                                if(final_freqs[r][c]!=NULL) free(final_freqs[r][c]);
+								final_freqs[r][c]=NULL;
+                                                                if(final_angles[r][c]!=NULL) free(final_angles[r][c]);
+								final_angles[r][c]=NULL;
+							}
         						fprintf(stderr,"Error opening beam lookup table file\n");
 						  }
 						}
