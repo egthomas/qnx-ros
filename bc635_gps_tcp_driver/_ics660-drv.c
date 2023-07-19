@@ -31,6 +31,7 @@ main( int argc, char **argv)
   /* check to see if device number is specified when invoked */
   if( argc == 1 ){
     fprintf(stderr, "%s: Invoke with device number (i.e. 1 = /dev/ics660-1)\n",argv[0]);
+    free(device);
     return EXIT_FAILURE;
   }
   

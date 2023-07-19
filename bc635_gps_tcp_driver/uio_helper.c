@@ -83,7 +83,10 @@ int line_from_file(char *filename, char *linebuf)
 	FILE* file = fopen(filename,"r");
 	if (!file) return -1;
 	s = fgets(linebuf,UIO_MAX_NAME_SIZE,file);
-	if (!s) return -2;
+	if (!s) {
+		fclose(file);
+		return -2;
+	}
 	for (i=0; (*s)&&(i<UIO_MAX_NAME_SIZE); i++) {
 		if (*s == '\n') *s = 0;
 		s++;

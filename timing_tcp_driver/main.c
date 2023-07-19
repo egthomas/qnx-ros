@@ -323,6 +323,8 @@ int main(){
 		if (verbose > 0) printf("accepting socket!!!!!\n");
 		if( (msgsock==-1) ){
 			perror("accept FAILED!");
+			free(bad_transmit_times.start_usec);
+			free(bad_transmit_times.duration_usec);
 			return EXIT_FAILURE;
 		}
 		else while (rval>=0){
@@ -370,7 +372,7 @@ int main(){
 			  client.radar,client.channel,client.tbeam,msg.status);	
 		        rval=recv_data(msgsock,&index,sizeof(index));
 		        if (verbose > 1) printf("Requested index: %d %d %d\n",r,c,index);	
-		        if (verbose > 1) printf("Attempting Free on pulseseq :p\n",pulseseqs[r][c][index]);	
+		        if (verbose > 1) printf("Attempting Free on pulseseq\n");	
                         if (pulseseqs[r][c][index]!=NULL) {
                           if (pulseseqs[r][c][index]->rep!=NULL)  free(pulseseqs[r][c][index]->rep);
                           if (pulseseqs[r][c][index]->code!=NULL) free(pulseseqs[r][c][index]->code);

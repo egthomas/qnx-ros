@@ -109,7 +109,7 @@ int _select_beam(unsigned int base,struct ControlPRM *client){
 
         unsigned int portA,portB,portC,cntl;        
         if (verbose > 1) { 
-          printf("DIO: Select beam\n",client->tfreq);	
+          printf("DIO: Select beam\n");	
           printf("  Base Beamnm: %d\n",client->tbeam);	
           printf("  Selected Freq [kHz]: %d\n",client->tfreq);	
           printf("  Selected Radar: %d\n",client->radar);	

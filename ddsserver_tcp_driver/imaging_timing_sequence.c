@@ -102,7 +102,7 @@ int imaging_timing_sequence(int numclients,  int max_seq_length, struct  Control
      
   }
   for( j=0; j<numclients; j++){
-        if (verbose > 1) printf("Client Number :%d radar:%d channel:\n",j,clients[j].radar,clients[j].channel);
+        if (verbose > 1) printf("Client Number :%d radar:%d channel:%d\n",j,clients[j].radar,clients[j].channel);
         r=clients[j].radar-1; 
         rr=r+2;
         c=clients[j].channel-1; 

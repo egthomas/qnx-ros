@@ -995,7 +995,7 @@ int io_devctl (resmgr_context_t *ctp, io_devctl_t *msg, RESMGR_OCB_T *ocb){
                             pthread_join(helperA, NULL);
 	                    temp=clock_gettime(CLOCK_REALTIME, &stop);
                             elapsed=stop.tv_sec-start.tv_sec+((double)(stop.tv_nsec-start.tv_nsec))/1E9;
-                            fprintf(stderr,"  %d Joined HelperA thread\n",pci_index,helperA);
+                            fprintf(stderr,"  %d Joined HelperA thread %d\n",pci_index,helperA);
                             fprintf(stderr,"  %d Elapsed  secs: %lf\n",pci_index,elapsed);
                             helperA=NULL;
                           }

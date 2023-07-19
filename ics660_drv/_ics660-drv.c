@@ -48,6 +48,7 @@ main( int argc, char **argv)
   /* initialize dispatch interface */
   if((dpp = dispatch_create()) == NULL){
     fprintf(stderr, "%s: Unable to allocate dispatch handle.\n", argv[0]);
+    free(device);
     return EXIT_FAILURE;
   }
   /* initialize resource manager attributes */

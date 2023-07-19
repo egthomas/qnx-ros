@@ -809,7 +809,7 @@ int main(int argc, char **argv){
                                   Q=tmp & 0x0000ffff;  
                                   power=(double)((double)I*(double)I+(double)Q*(double)Q);  
                                   power=10*log10(power);   
-                                  if (verbose > 1 ) fprintf(stdout,"%8d %8d %8.3lf\n",x,I,Q,(double)power);                                        
+                                  if (verbose > 1 ) fprintf(stdout,"%8d :: %8d %8d %8.3lf\n",x,I,Q,(double)power);                                        
                                 }
                               }
                               fflush(stdout);
