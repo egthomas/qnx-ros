@@ -593,7 +593,7 @@ int main(int argc, char **argv){
                         gettimeofday(&t1,NULL);
                         elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t1.tv_usec-t0.tv_usec);
-                        if (verbose > 0) printf("  Receiver Client Ready Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 0) printf("  Receiver Client Ready Elapsed Microseconds: %lu\n",elapsed);
                         if (verbose > 1)  printf("Ending Client Ready Setup\n");
                         break; 
 
@@ -721,7 +721,7 @@ int main(int argc, char **argv){
                         gettimeofday(&t1,NULL);
                         elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t1.tv_usec-t0.tv_usec);
-                        if (verbose > 0) printf("  Receiver Pre-trigger Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 0) printf("  Receiver Pre-trigger Elapsed Microseconds: %lu\n",elapsed);
                         if (verbose > 1)  printf("Ending Pretrigger Setup\n");
                         gettimeofday(&tpre,NULL);
                         //triggerGC214(baseGC214);
@@ -743,7 +743,7 @@ int main(int argc, char **argv){
                         gettimeofday(&t1,NULL);
                         elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t1.tv_usec-t0.tv_usec);
-                        if (verbose > 0) printf("  Receiver Post-trigger Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 0) printf("  Receiver Post-trigger Elapsed Microseconds: %lu\n",elapsed);
                         if (verbose > 1)  printf("Ending Post-trigger\n");
                         break;
 
@@ -868,11 +868,11 @@ int main(int argc, char **argv){
                         gettimeofday(&tpost,NULL);
                         elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t1.tv_usec-t0.tv_usec);
-                        if (verbose > 1) printf("  Receiver Get Data Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 1) printf("  Receiver Get Data Elapsed Microseconds: %lu\n",elapsed);
                         if (verbose > 1)  printf("Ending Get Data\n");
                         elapsed=(tpost.tv_sec-tpre.tv_sec)*1E6;
                         elapsed+=(tpost.tv_usec-tpre.tv_usec);
-                        if (verbose > 1) printf("  Receiver PreTrig to Get Data Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 1) printf("  Receiver PreTrig to Get Data Elapsed Microseconds: %lu\n",elapsed);
                         break;
 
                       case RECV_CLRFREQ:
@@ -998,7 +998,7 @@ int main(int argc, char **argv){
                             if (verbose > 1) { 
                               elapsed=(t5.tv_sec-t4.tv_sec)*1E6;
                               elapsed+=(t5.tv_usec-t4.tv_usec);
-                              printf("    Receiver: ClrFreq Collection Wait Elapsed Microseconds: %ld\n",elapsed);
+                              printf("    Receiver: ClrFreq Collection Wait Elapsed Microseconds: %lu\n",elapsed);
                             }
                             power=0;
                             main=main_virtual[r][c][b];
@@ -1031,7 +1031,7 @@ int main(int argc, char **argv){
                               gettimeofday(&t3,NULL);
                               elapsed=(t3.tv_sec-t2.tv_sec)*1E6;
                               elapsed+=(t3.tv_usec-t2.tv_usec);
-                              printf("    Receiver: ClrFreq Iteration %d Fill %d FFT Input Elapsed Microseconds: %ld\n",ii,N,elapsed);
+                              printf("    Receiver: ClrFreq Iteration %d Fill %d FFT Input Elapsed Microseconds: %lu\n",ii,N,elapsed);
                             }
                             fflush(stdout); 
                           } else {
@@ -1061,7 +1061,7 @@ int main(int argc, char **argv){
                               gettimeofday(&t3,NULL);
                               elapsed=(t3.tv_sec-t2.tv_sec)*1E6;
                               elapsed+=(t3.tv_usec-t2.tv_usec);
-                              printf("      Receiver: ClrFreq Iteration %d Calculate %d FFT Elapsed Microseconds: %ld\n",ii,N,elapsed);
+                              printf("      Receiver: ClrFreq Iteration %d Calculate %d FFT Elapsed Microseconds: %lu\n",ii,N,elapsed);
                             }
 
                           }
@@ -1102,7 +1102,7 @@ int main(int argc, char **argv){
                           gettimeofday(&t1,NULL);
                           elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                           elapsed+=(t1.tv_usec-t0.tv_usec);
-                          printf("  Receiver: ClrFreq Search Elapsed Microseconds: %ld\n",elapsed);
+                          printf("  Receiver: ClrFreq Search Elapsed Microseconds: %lu\n",elapsed);
                         }
                         break;                      
 

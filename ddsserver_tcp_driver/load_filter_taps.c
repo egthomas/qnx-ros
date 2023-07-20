@@ -23,7 +23,7 @@ extern int verbose;
 void load_filter_taps(FILE *ics660, uint32_t chip, uint32_t channel, int fc, double t_in)
 {
   struct ICS660_FILTER filter_str;
-  if (verbose > 1) printf("  In Load filter taps file:%d chip:%d channel:%d trise:%d state:%lf\n"
+  if (verbose > 1) printf("  In Load filter taps file:%d chip:%u channel:%d trise:%d state:%lf\n"
                           ,ics660,chip,channel,fc,t_in);	
 
   filter_str.chip = chip;

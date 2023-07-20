@@ -122,7 +122,7 @@ io_read (resmgr_context_t *ctp, io_read_t *msg, RESMGR_OCB_T *ocb)
   nbytes = min(msg->i.nbytes, nleft);
 
   cval = *(uint32_t *)ics660->regs.control;
-  fprintf(stderr,"io_read - cval %d\n",cval);
+  fprintf(stderr,"io_read - cval %u\n",cval);
   sprintf(lbuff,"%x",cval);
   for( chip=1; chip<=4; chip++){
     select_chip(ics660->mod_control_reg,chip);

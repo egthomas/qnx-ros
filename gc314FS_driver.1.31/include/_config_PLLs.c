@@ -108,7 +108,7 @@ int _config_PLLs(char *BASE1, int clock_source, long clock_freq){
 			return -1;
 		  }
 		  else{
-			fprintf(stderr,"	Clock value of %d is not properly defined\n", clock_freq);
+			fprintf(stderr,"	Clock value of %ld is not properly defined\n", clock_freq);
                         fflush(stderr);
 			return -1;
 		  }

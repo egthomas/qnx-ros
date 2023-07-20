@@ -60,7 +60,7 @@ int imaging_timing_sequence(int numclients,  int max_seq_length, struct  Control
   pci_min=0;
 
 
-  if (verbose > -1) printf("Inside MSI timing sequence clients:%d SC: %d Max: %d\n",numclients,SC,max_seq_length);	
+  if (verbose > -1) printf("Inside MSI timing sequence clients:%d SC: %ld Max: %d\n",numclients,SC,max_seq_length);	
 #ifdef __QNX__
   for( pci_ind=pci_min; pci_ind < DDS_MAX_CARDS; pci_ind ++)
      status=ics660_init(ics660[pci_ind],pci_ind);
@@ -146,7 +146,7 @@ int imaging_timing_sequence(int numclients,  int max_seq_length, struct  Control
               dac_value.samples.high =(short)1*max_val[1];                 
               if (ind < SC)
                 data_ar[ind] = (uint32_t) dac_value.two_samp;             
-              else printf("Index too big: %d %d\n",ind,SC);
+              else printf("Index too big: %d %ld\n",ind,SC);
           }                                                             
         }            
       } // end of client loop

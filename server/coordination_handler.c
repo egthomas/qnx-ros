@@ -75,7 +75,7 @@ void *coordination_handler(struct ControlProgram *control_program)
            if (verbose > 1) { 
               elapsed=(t_ready_final.tv_sec-t_ready_first.tv_sec)*1E6;
               elapsed+=(t_ready_final.tv_usec-t_ready_first.tv_usec);
-              fprintf(stderr,"Coord: Client Ready Wait Elapsed Microseconds: %10ld :: sec: %10d usec: %10d\n",elapsed,t_ready_final.tv_sec,t_ready_final.tv_usec);
+              fprintf(stderr,"Coord: Client Ready Wait Elapsed Microseconds: %10lu :: sec: %10d usec: %10d\n",elapsed,t_ready_final.tv_sec,t_ready_final.tv_usec);
 	      fflush(stderr);
            }
          } else {
@@ -98,7 +98,7 @@ void *coordination_handler(struct ControlProgram *control_program)
           if (verbose > 1) { 
               elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
               elapsed+=(t1.tv_usec-t0.tv_usec);
-              printf("Coord: Start Ready State Case 2 Elapsed Microseconds: %ld\n",elapsed);
+              printf("Coord: Start Ready State Case 2 Elapsed Microseconds: %lu\n",elapsed);
           }
         /*all control programs ready for trigger*/
           trigger_state=1;
@@ -124,7 +124,7 @@ void *coordination_handler(struct ControlProgram *control_program)
           if (verbose > 1) { 
               elapsed=(t2.tv_sec-t1.tv_sec)*1E6;
               elapsed+=(t2.tv_usec-t1.tv_usec);
-              printf("Coord: Pre-Trigger Active Check %d Elapsed Microseconds: %ld\n",i,elapsed);
+              printf("Coord: Pre-Trigger Active Check %d Elapsed Microseconds: %lu\n",i,elapsed);
           }
  
           gettimeofday(&t_pre_start,NULL);
@@ -154,7 +154,7 @@ void *coordination_handler(struct ControlProgram *control_program)
           if (verbose > 1) { 
               elapsed=(t_pre_end.tv_sec-t_pre_start.tv_sec)*1E6;
               elapsed+=(t_pre_end.tv_usec-t_pre_start.tv_usec);
-              fprintf(stderr,"Coord: Pre-Trigger Thread Run Elapsed Microseconds: %10ld :: sec: %10d usec: %10d\n",elapsed,t_pre_end.tv_sec,t_pre_end.tv_usec);
+              fprintf(stderr,"Coord: Pre-Trigger Thread Run Elapsed Microseconds: %10lu :: sec: %10d usec: %10d\n",elapsed,t_pre_end.tv_sec,t_pre_end.tv_usec);
 	      fflush(stderr);
           }
           gettimeofday(&t3,NULL);
@@ -164,7 +164,7 @@ void *coordination_handler(struct ControlProgram *control_program)
             gettimeofday(&t4,NULL);
             elapsed=(t4.tv_sec-t3.tv_sec)*1E6;
             elapsed+=(t4.tv_usec-t3.tv_usec);
-            printf("Coord: Trigger Elapsed Microseconds: %ld\n",elapsed);
+            printf("Coord: Trigger Elapsed Microseconds: %lu\n",elapsed);
           }
           trigger_state=3;//post-trigger
           msg.type=GPS_GET_EVENT_TIME;
@@ -225,18 +225,18 @@ void *coordination_handler(struct ControlProgram *control_program)
           if (verbose > 1) { 
             elapsed=(t6.tv_sec-t4.tv_sec)*1E6;
             elapsed+=(t6.tv_usec-t4.tv_usec);
-            printf("Coord: Post Trigger Elapsed Microseconds: %ld\n",elapsed);
+            printf("Coord: Post Trigger Elapsed Microseconds: %lu\n",elapsed);
           }
           if (verbose > 1) { 
             elapsed=(t6.tv_sec-t0.tv_sec)*1E6;
             elapsed+=(t6.tv_usec-t0.tv_usec);
-            printf("Coord: Total Elapsed Microseconds: %ld\n",elapsed);
+            printf("Coord: Total Elapsed Microseconds: %lu\n",elapsed);
           }
           gettimeofday(&t_post_end,NULL);
           if (verbose > 1) { 
               elapsed=(t_post_end.tv_sec-t_pre_start.tv_sec)*1E6;
               elapsed+=(t_post_end.tv_usec-t_pre_start.tv_usec);
-              fprintf(stderr,"Coord: Pre-trigger start to Post-Trigger end Elapsed Microseconds: %10ld :: sec: %10d usec: %10d\n",elapsed,t_post_end.tv_sec,t_post_end.tv_usec);
+              fprintf(stderr,"Coord: Pre-trigger start to Post-Trigger end Elapsed Microseconds: %10lu :: sec: %10d usec: %10d\n",elapsed,t_post_end.tv_sec,t_post_end.tv_usec);
 	      fflush(stderr);
           }
           break; 

@@ -414,7 +414,7 @@ void graceful_cleanup(int signum)
 						rate=1E8/(n1*n2);
           					n1=htons(n1); //Ensure MSB ordering
           					n2=htons(n2); //Ensure MSB ordering
-          					fprintf(stderr,"Set Periodic Output Rate %d Hz :",rate);
+          					fprintf(stderr,"Set Periodic Output Rate %lf Hz :",rate);
           					buffer[0] = DATUM_SET_PERIODIC_CMD;
           					buffer[1] = DATUM_NO_SYNC_PPS;
           					puint16=(uint16*)&buffer[2];

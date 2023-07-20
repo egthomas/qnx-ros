@@ -486,7 +486,7 @@ int main(){
                                 }
                                 else  master_buf[j]|=seq_buf[r][c][j];
                               } 
-                              if (verbose > 1 ) printf("Total Tr %d\n",counter);
+                              if (verbose > 1 ) printf("Total Tr %lu\n",counter);
 			    }
 			    // add the FIFO level bits
                             bad_transmit_times.length=0;
@@ -547,9 +547,9 @@ int main(){
                               dds_trigger=scope_start+(int)((double)dds_offset/((double)STATE_TIME+0.5));
                               rx_trigger=scope_start+(int)((double)rx_offset/((double)STATE_TIME+0.5));
                               if (verbose > 1 ) {
-                                printf("---> Scope Sync in Master %ld at %d\n",max_seq_count,scope_start); 
-                                printf("---> DDS Trigger in Master %ld at %d\n",max_seq_count,dds_trigger); 
-                                printf("---> Rx Trigger in Master %ld at %d\n",max_seq_count,rx_trigger); 
+                                printf("---> Scope Sync in Master %d at %d\n",max_seq_count,scope_start); 
+                                printf("---> DDS Trigger in Master %d at %d\n",max_seq_count,dds_trigger); 
+                                printf("---> Rx Trigger in Master %d at %d\n",max_seq_count,rx_trigger); 
                               } 
                             } else {
                               if (verbose > 1 ) printf("XXX> Scope Sync not in Master %ld\n",max_seq_count); 
@@ -618,7 +618,7 @@ int main(){
                         elapsed=(t6.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t6.tv_usec-t0.tv_usec);
                         if (verbose > 1) {
-                          printf("Timing Pretrigger Elapsed Microseconds: %ld\n",elapsed);
+                          printf("Timing Pretrigger Elapsed Microseconds: %lu\n",elapsed);
                         }
                         break; 
 

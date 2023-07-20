@@ -93,11 +93,11 @@ int _open_PLX9052(int *pci_handle, unsigned int *mmap_io_ptr, int *interrupt_lin
     /* PRINT PLX9656 PARAMETERS */
 	if (print == 1){
 		printf("	PCI DEVICE PARAMETERS:\n");
-		printf("	  lastbus=		%d\n", lastbus);
-		printf("	  version=		%d\n", version);
-		printf("	  hardware=		%d\n", hardware);
-		printf("	  bus=			%d\n", bus);
-		printf("	  device=		%d\n", device);
+		printf("	  lastbus=		%u\n", lastbus);
+		printf("	  version=		%u\n", version);
+		printf("	  hardware=		%u\n", hardware);
+		printf("	  bus=			%u\n", bus);
+		printf("	  device=		%u\n", device);
 		printf("	MEMORY ALLOCATION:\n");
 		printf("	  IO Base0=		0x%x\n", pci_reg.Base_Address_Regs[0]);
 		printf("	  IO Base1=		0x%x\n", pci_reg.Base_Address_Regs[1]);

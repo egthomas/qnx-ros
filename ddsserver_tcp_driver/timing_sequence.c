@@ -71,7 +71,7 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
       max_val[r][c]=max_val[r][1]/c;
     }
   }
-  if (verbose > -1) fprintf(stdout,"Inside MSI timing sequence SC: %d Max: %d\n",SC,max_seq_length);	
+  if (verbose > -1) fprintf(stdout,"Inside MSI timing sequence SC: %ld Max: %d\n",SC,max_seq_length);	
 #ifdef __QNX__
   for( pci_ind=pci_min; pci_ind < DDS_MAX_CARDS; pci_ind ++) {
      status=ics660_init(ics660[pci_ind],pci_ind);
@@ -139,7 +139,7 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
                 else { 
                   if (dac_value.samples.low!=0 || dac_value.samples.high!=0) {
                     fprintf(stderr,"Timing Sequence Error:: Index out of bounds\n");
-                    fprintf(stderr,"  ind: %d SC: %d data_ar: %p\n",ind,SC,data_ar);
+                    fprintf(stderr,"  ind: %d SC: %ld data_ar: %p\n",ind,SC,data_ar);
                     fprintf(stdout,"  r: %d c: %d i: %d num_active_chans[r]: %d\n",r,c,i,num_active_chans[r]);
                     fprintf(stderr," DDS chan val: %d\n",cc);
                     fprintf(stderr,"  low: %d high: %d\n",dac_value.samples.low,dac_value.samples.high);
@@ -159,7 +159,7 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
                   else {
                     if (dac_value.samples.low!=0 || dac_value.samples.high!=0) {
                       fprintf(stderr,"Imaging Timing Sequence Error:: Index out of bounds\n");
-                      fprintf(stderr,"  ind: %d SC: %d data_ar: %p\n",ind,SC,data_ar);
+                      fprintf(stderr,"  ind: %d SC: %ld data_ar: %p\n",ind,SC,data_ar);
                       fprintf(stdout,"  r: %d c: %d i: %d num_active_chans[r]: %d\n",r,c,i,num_active_chans[r]);
                       fprintf(stderr," DDS chan val: %d\n",cc);
                       fprintf(stderr,"  low: %d high: %d\n",dac_value.samples.low,dac_value.samples.high);
@@ -188,7 +188,7 @@ int msi_timing_sequence(int numclients,  int max_seq_length, struct  ControlPRM 
               else { 
                   if (dac_value.samples.low!=0 || dac_value.samples.high!=0) {
                     fprintf(stderr,"IF Timing Sequence Error:: Index out of bounds\n");
-                    fprintf(stderr,"  ind: %d SC: %d data_ar: %p\n",ind,SC,data_ar);
+                    fprintf(stderr,"  ind: %d SC: %ld data_ar: %p\n",ind,SC,data_ar);
                     fprintf(stdout,"  rr: %d cc: %d i: %d num_active_chans[r]: %d\n",rr,cc,i,num_active_chans[r]);
                     fprintf(stderr," DDS chan val: %d\n",cc);
                     fprintf(stderr,"  low: %d high: %d\n",dac_value.samples.low,dac_value.samples.high);

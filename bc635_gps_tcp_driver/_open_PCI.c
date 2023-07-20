@@ -91,11 +91,11 @@ int _open_PCI(unsigned int *DEVreg, unsigned int *DPram, int *pci_handle,  int *
     /* PRINT PLX9656 PARAMETERS */
 	if (verbose > 0) {
 		printf("	PCI DEVICE PARAMETERS:\n");
-		printf("	  lastbus=		%d\n", lastbus);
-		printf("	  version=		%d\n", version);
-		printf("	  hardware=		%d\n", hardware);
-		printf("	  bus=			%d\n", bus);
-		printf("	  device=		%d\n", device);
+		printf("	  lastbus=		%u\n", lastbus);
+		printf("	  version=		%u\n", version);
+		printf("	  hardware=		%u\n", hardware);
+		printf("	  bus=			%u\n", bus);
+		printf("	  device=		%u\n", device);
 		printf("	  interrupt=		%d\n", pci_reg.Interrupt_Line);
 		printf("	MEMORY ALLOCATION:\n");
 		printf("	  MEM 0=		0x%x\n", pci_reg.Base_Address_Regs[0]);

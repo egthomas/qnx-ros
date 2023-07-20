@@ -782,17 +782,17 @@ control_program);
             if (verbose > 1) {
               elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
               elapsed+=(t1.tv_usec-t0.tv_usec);
-              if (verbose > 1 ) printf("Client:  Get Data Elapsed Microseconds: %ld\n",elapsed);
+              if (verbose > 1 ) printf("Client:  Get Data Elapsed Microseconds: %lu\n",elapsed);
             }
             //printf("GET_DATA: END\n");
             gettimeofday(&t_get_data_end,NULL);
             if (verbose > 1) {
               elapsed=(t_get_data_end.tv_sec-t_pre_start.tv_sec)*1E6;
               elapsed+=(t_get_data_end.tv_usec-t_pre_start.tv_usec);
-              fprintf(stderr,"Client %2d %2d:  From Pretrig start to Get Data end Elapsed Microseconds: %10ld  :: sec: %10d usec: %10d\n",r,c,elapsed,t_get_data_end.tv_sec,t_get_data_end.tv_usec);
+              fprintf(stderr,"Client %2d %2d:  From Pretrig start to Get Data end Elapsed Microseconds: %10lu  :: sec: %10d usec: %10d\n",r,c,elapsed,t_get_data_end.tv_sec,t_get_data_end.tv_usec);
               elapsed=(t_get_data_end.tv_sec-t_ready_first.tv_sec)*1E6;
               elapsed+=(t_get_data_end.tv_usec-t_ready_first.tv_usec);
-              fprintf(stderr,"Client %2d %2d:  From Client Ready start to Get Data end Elapsed Microseconds: %10ld  :: sec: %10d usec: %10d\n",r,c,elapsed,t_get_data_end.tv_sec,t_get_data_end.tv_usec);
+              fprintf(stderr,"Client %2d %2d:  From Client Ready start to Get Data end Elapsed Microseconds: %10lu  :: sec: %10d usec: %10d\n",r,c,elapsed,t_get_data_end.tv_sec,t_get_data_end.tv_usec);
              fflush(stderr); 
             }
             break;
@@ -852,7 +852,7 @@ control_program);
             if (verbose > 1) {
               elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
               elapsed+=(t1.tv_usec-t0.tv_usec);
-              if (verbose > 1 ) printf("Client:  Reg Seq Elapsed Microseconds: %ld\n",elapsed);
+              if (verbose > 1 ) printf("Client:  Reg Seq Elapsed Microseconds: %lu\n",elapsed);
             }
             //printf("REGISTER_SEQ: END\n");
             break;
@@ -892,7 +892,7 @@ control_program);
                 if (verbose > 1) {
                    elapsed=(t3.tv_sec-t2.tv_sec)*1E6;
                    elapsed+=(t3.tv_usec-t2.tv_usec);
-                   if (verbose > 1 ) printf("Client:Set Ready: %d Elapsed Microseconds: %ld\n",i,elapsed);
+                   if (verbose > 1 ) printf("Client:Set Ready: %d Elapsed Microseconds: %lu\n",i,elapsed);
                 }
               }
               gettimeofday(&t2,NULL);
@@ -904,7 +904,7 @@ control_program);
               if (verbose > 1) {
                    elapsed=(t3.tv_sec-t2.tv_sec)*1E6;
                    elapsed+=(t3.tv_usec-t2.tv_usec);
-                   if (verbose > 1 ) printf("Client:Set Ready: Coord Elapsed Microseconds: %ld\n",elapsed);
+                   if (verbose > 1 ) printf("Client:Set Ready: Coord Elapsed Microseconds: %lu\n",elapsed);
               }
               pthread_mutex_unlock(&controlprogram_list_lock);
             }
@@ -913,7 +913,7 @@ control_program);
             if (verbose > 1) {
               elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
               elapsed+=(t1.tv_usec-t0.tv_usec);
-              if (verbose > 1 ) printf("Client:  Set Ready Elapsed Microseconds: %ld\n",elapsed);
+              if (verbose > 1 ) printf("Client:  Set Ready Elapsed Microseconds: %lu\n",elapsed);
             }
             if (verbose > 1 ) fprintf(stderr,"Client: End READY: %ld %ld :: %d %d\n",(long)t1.tv_sec,(long)t1.tv_usec,r,c);
             break;
@@ -940,7 +940,7 @@ control_program);
             if (verbose > 1) {
               elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
               elapsed+=(t1.tv_usec-t0.tv_usec);
-              if (verbose > 1 ) printf("Client:  CLR Elapsed Microseconds: %ld\n",elapsed);
+              if (verbose > 1 ) printf("Client:  CLR Elapsed Microseconds: %lu\n",elapsed);
             }
             break;
           case REQUEST_ASSIGNED_FREQ:
@@ -965,7 +965,7 @@ control_program);
             if (verbose > 1) {
               elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
               elapsed+=(t1.tv_usec-t0.tv_usec);
-              if (verbose > 1 ) printf("Client:  Request Freq Elapsed Microseconds: %ld\n",elapsed);
+              if (verbose > 1 ) printf("Client:  Request Freq Elapsed Microseconds: %lu\n",elapsed);
             }
             break;
 

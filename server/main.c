@@ -91,12 +91,12 @@ void graceful_cleanup(int signum)
   t=0;
   if (thread_list!=NULL) {
     while(thread_list!=NULL){
-      if (verbose>0) fprintf(stderr,"Cancelling thread %ld\n",t);
+      if (verbose>0) fprintf(stderr,"Cancelling thread %d\n",t);
       pthread_cancel(thread_list->id);       
-      if (verbose>0) fprintf(stderr,"Done Cancelling thread %ld\n",t);
-      if (verbose>0) fprintf(stderr,"Joining thread %ld\n",t);
+      if (verbose>0) fprintf(stderr,"Done Cancelling thread %d\n",t);
+      if (verbose>0) fprintf(stderr,"Joining thread %d\n",t);
       pthread_join(thread_list->id,NULL);
-      if (verbose>0) fprintf(stderr,"Done Joining thread %ld\n",t);
+      if (verbose>0) fprintf(stderr,"Done Joining thread %d\n",t);
 
       pthread_mutex_lock(&controlprogram_list_lock);
 
@@ -210,15 +210,15 @@ int main()
   coord_lock_buffer = realloc(NULL, 1);
   strcpy(coord_lock_buffer, "");
 
-  printf("Size of Struct ROSMsg  %d\n",sizeof(struct ROSMsg));
-  printf("Size of Struct int32  %d\n",sizeof(int32_t));
-  printf("Size of Struct float  %d\n",sizeof(float));
-  printf("Size of Struct unsigned char  %d\n",sizeof(unsigned char));
-  printf("Size of Struct ControlPRM  %d\n",sizeof(struct ControlPRM));
-  printf("Size of Struct CLRFreqPRM  %d\n",sizeof(struct CLRFreqPRM));
-  printf("Size of Struct SeqPRM  %d\n",sizeof(struct SeqPRM));
-  printf("Size of Struct DataPRM  %d\n",sizeof(struct DataPRM));
-  printf("Size of Struct SiteSettings  %d\n",sizeof(struct SiteSettings));
+  printf("Size of Struct ROSMsg  %lu\n",sizeof(struct ROSMsg));
+  printf("Size of Struct int32  %lu\n",sizeof(int32_t));
+  printf("Size of Struct float  %lu\n",sizeof(float));
+  printf("Size of Struct unsigned char  %lu\n",sizeof(unsigned char));
+  printf("Size of Struct ControlPRM  %lu\n",sizeof(struct ControlPRM));
+  printf("Size of Struct CLRFreqPRM  %lu\n",sizeof(struct CLRFreqPRM));
+  printf("Size of Struct SeqPRM  %lu\n",sizeof(struct SeqPRM));
+  printf("Size of Struct DataPRM  %lu\n",sizeof(struct DataPRM));
+  printf("Size of Struct SiteSettings  %lu\n",sizeof(struct SiteSettings));
 
   gettimeofday(&t0,NULL);
   default_timeout.tv_sec=15;

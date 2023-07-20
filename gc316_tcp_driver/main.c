@@ -332,7 +332,7 @@ int add_phase(int frequency, int beamdir, int length, int radar,int channel, int
        gettimeofday(&t1,NULL);
        elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
        elapsed+=(t1.tv_usec-t0.tv_usec);
-       if (verbose > 1 ) printf("  Phase Add Elapsed Microseconds: %ld\n",elapsed);
+       if (verbose > 1 ) printf("  Phase Add Elapsed Microseconds: %lu\n",elapsed);
 
        if(write) {
          chan_str[0]='\0';
@@ -694,7 +694,7 @@ int main(int argc, char **argv){
                         gettimeofday(&t1,NULL);
                         elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t1.tv_usec-t0.tv_usec);
-                        if (verbose > 1) printf("  Receiver Client Ready Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 1) printf("  Receiver Client Ready Elapsed Microseconds: %lu\n",elapsed);
                         if (verbose > 1)  printf("Ending Client Ready Setup\n");
                         break; 
 
@@ -813,7 +813,7 @@ int main(int argc, char **argv){
                         gettimeofday(&t1,NULL);
                         elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t1.tv_usec-t0.tv_usec);
-                        if (verbose > 0) printf("  Receiver Pre-trigger Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 0) printf("  Receiver Pre-trigger Elapsed Microseconds: %lu\n",elapsed);
                         if (verbose > 1)  printf("Ending Pretrigger Setup\n");
                         gettimeofday(&tpre,NULL);
                         break; 
@@ -839,7 +839,7 @@ int main(int argc, char **argv){
                         gettimeofday(&t1,NULL);
                         elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t1.tv_usec-t0.tv_usec);
-                        if (verbose > 0) printf("  Receiver Post-trigger Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 0) printf("  Receiver Post-trigger Elapsed Microseconds: %lu\n",elapsed);
                         if (verbose > 1)  printf("Ending Post-trigger\n");
                         break;
 //JDS : Pick up here
@@ -869,7 +869,7 @@ int main(int argc, char **argv){
                           gettimeofday(&t1,NULL);
                           elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                           elapsed+=(t1.tv_usec-t0.tv_usec);
-                          if (verbose > 1) printf("  Receiver Wait For Data Elapsed Microseconds: %ld\n",elapsed);
+                          if (verbose > 1) printf("  Receiver Wait For Data Elapsed Microseconds: %lu\n",elapsed);
                           rval=send_data(msgsock,&status,sizeof(status));
 			  if(verbose > 1 ) printf("  SHM Memory: %d\n",shm_memory);	
                           if (status==0) {
@@ -928,13 +928,13 @@ int main(int argc, char **argv){
                         gettimeofday(&tpost,NULL);
                         elapsed=(t2.tv_sec-t1.tv_sec)*1E6;
                         elapsed+=(t2.tv_usec-t1.tv_usec);
-                        if (verbose > 1) printf("  Receiver Data Post Process Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 1) printf("  Receiver Data Post Process Elapsed Microseconds: %lu\n",elapsed);
                         elapsed=(t2.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t2.tv_usec-t0.tv_usec);
-                        if (verbose > 1) printf("  Receiver Get Data Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 1) printf("  Receiver Get Data Elapsed Microseconds: %lu\n",elapsed);
                         elapsed=(tpost.tv_sec-tpre.tv_sec)*1E6;
                         elapsed+=(tpost.tv_usec-tpre.tv_usec);
-                        if (verbose > 1) printf("  Receiver PreTrig to Get Data finish Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 1) printf("  Receiver PreTrig to Get Data finish Elapsed Microseconds: %lu\n",elapsed);
                         if (verbose > 1)  printf("Ending Get Data\n");
                         break;
 
@@ -1211,7 +1211,7 @@ int main(int argc, char **argv){
                           gettimeofday(&t4,NULL);
                           elapsed=(t4.tv_sec-t0.tv_sec)*1E6;
                           elapsed+=(t4.tv_usec-t0.tv_usec);
-                          printf("  Receiver: ClrFreq Search Elapsed Microseconds: %ld\n",elapsed);
+                          printf("  Receiver: ClrFreq Search Elapsed Microseconds: %lu\n",elapsed);
                        }
             
                         break;                      

@@ -95,11 +95,11 @@ int initPCI9080(int *ad_irq,unsigned int *BASEA,unsigned int *BASEB,unsigned int
   /* PRINT PLX9656 PARAMETERS */
 	if (print == 1){
 		printf("	PCI DEVICE PARAMETERS:\n");
-		printf("	  lastbus=		%d\n", lastbus);
-		printf("	  version=		%d\n", version);
-		printf("	  hardware=		%d\n", hardware);
-		printf("	  bus=			%d\n", bus);
-		printf("	  device=		%d\n", device);
+		printf("	  lastbus=		%u\n", lastbus);
+		printf("	  version=		%u\n", version);
+		printf("	  hardware=		%u\n", hardware);
+		printf("	  bus=			%u\n", bus);
+		printf("	  device=		%u\n", device);
 		printf("	MEMORY ALLOCATION:\n");
 		printf("	  MEM Base0=		0x%x\n", pci_reg.Base_Address_Regs[0]);
 		printf("	  MEM Base1=		0x%x\n", pci_reg.Base_Address_Regs[2]);

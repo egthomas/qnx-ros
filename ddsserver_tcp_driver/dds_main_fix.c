@@ -343,7 +343,7 @@ int main(){
 		      case DDS_RXFE_SETTINGS:
                         if (verbose > -1) printf("DDS driver: Configuring for IF Mode\n");
                         rval=recv_data(msgsock,&ifmode,sizeof(ifmode)); 
-                        if (verbose > -1) printf("DDS driver: IF Mode %d \n",ifmode);
+                        if (verbose > -1) printf("DDS driver: IF Mode %u \n",ifmode);
                         rval=recv_data(msgsock,&rf_settings,sizeof(struct RXFESettings)); 
                         rval=recv_data(msgsock,&if_settings,sizeof(struct RXFESettings)); 
                         if (ifmode && IMAGING ) fprintf(stderr,"WARNING: RF Mode can not be enabled with IMAGING\n");
@@ -434,7 +434,7 @@ int main(){
                                 gettimeofday(&t3,NULL);
                                 elapsed=(t3.tv_sec-t2.tv_sec)*1E6;
                                 elapsed+=(t3.tv_usec-t2.tv_usec);
-                                printf("  DDS MSI Timing Elapsed Microseconds: %ld\n",elapsed);
+                                printf("  DDS MSI Timing Elapsed Microseconds: %lu\n",elapsed);
                             }
                               /* Required one shot */
                             } else {
@@ -489,7 +489,7 @@ int main(){
                           gettimeofday(&t3,NULL);
                           elapsed=(t3.tv_sec-t2.tv_sec)*1E6;
                           elapsed+=(t3.tv_usec-t2.tv_usec);
-                          if (verbose > 0) printf("  DDS Set Filter and Freq  Elapsed Microseconds: %ld\n",elapsed);
+                          if (verbose > 0) printf("  DDS Set Filter and Freq  Elapsed Microseconds: %lu\n",elapsed);
                           if (verbose > 1) printf("Done setting the beam\n");	
 
                         } else {
@@ -504,7 +504,7 @@ int main(){
                                 gettimeofday(&t3,NULL);
                                 elapsed=(t3.tv_sec-t2.tv_sec)*1E6;
                                 elapsed+=(t3.tv_usec-t2.tv_usec);
-                                printf("  DDS IMAGING Timing Elapsed Microseconds: %ld\n",elapsed);
+                                printf("  DDS IMAGING Timing Elapsed Microseconds: %lu\n",elapsed);
                               }
                               /* Required one shot */
 	                    //one_shot_b(ics660[pci_master]);
@@ -556,7 +556,7 @@ int main(){
                           gettimeofday(&t3,NULL);
                           elapsed=(t3.tv_sec-t2.tv_sec)*1E6;
                           elapsed+=(t3.tv_usec-t2.tv_usec);
-                          if (verbose > 0) printf("  DDS Set Filter and Freq  Elapsed Microseconds: %ld\n",elapsed);
+                          if (verbose > 0) printf("  DDS Set Filter and Freq  Elapsed Microseconds: %lu\n",elapsed);
                           if (verbose > 1) printf("Done setting the beam\n");	
                         } 
                         msg.status=0;
@@ -571,7 +571,7 @@ int main(){
                         gettimeofday(&t1,NULL);
                         elapsed=(t1.tv_sec-t0.tv_sec)*1E6;
                         elapsed+=(t1.tv_usec-t0.tv_usec);
-                        if (verbose > 1) printf("  DDS Pretrigger Elapsed Microseconds: %ld\n",elapsed);
+                        if (verbose > 1) printf("  DDS Pretrigger Elapsed Microseconds: %lu\n",elapsed);
                         if (verbose > 1)  printf("Ending Pretrigger Setup\n");
                         break; 
 

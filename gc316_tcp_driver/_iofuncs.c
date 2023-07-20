@@ -79,7 +79,7 @@ io_read (resmgr_context_t *ctp, io_read_t *msg, RESMGR_OCB_T *ocb)
     return (ENOSYS);
 
   //set up 'string' of data to return
-  fprintf(stderr,"io_read - cval %d\n",cval);
+  fprintf(stderr,"io_read - cval %u\n",cval);
   //tempint=*((uint08*)(gc314base+GC314FS_GC1offset+GC4016_GLOBAL_RESET));
 /*
   sprintf(tempbuff,"GLOBAL_RESET Chip 1 = 0x%02x\n", *((uint08*)(gc314base+GC314FS_GC1offset+GC4016_GLOBAL_RESET)) );

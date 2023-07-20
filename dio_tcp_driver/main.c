@@ -375,7 +375,7 @@ int main(){
                                         case DIO_RXFE_SETTINGS:
                                                 if (verbose > 1) printf("DIO driver: Re-configuring RXFE Settings\n");
                                                 rval=recv_data(msgsock,&ifmode,sizeof(ifmode)); 
-                                                if (verbose > 1) printf("DIO driver: IF Mode %d \n",ifmode);
+                                                if (verbose > 1) printf("DIO driver: IF Mode %u \n",ifmode);
                                                 rval=recv_data(msgsock,&rf_settings,sizeof(struct RXFESettings)); 
                                                 rval=recv_data(msgsock,&if_settings,sizeof(struct RXFESettings));
                                                 rval=send_data(msgsock, &msg, sizeof(struct DriverMsg));
@@ -396,7 +396,7 @@ int main(){
                                                 rval=recv_data(msgsock,&radar_table_2,256*sizeof(char)); 
                                                 rval=send_data(msgsock, &msg, sizeof(struct DriverMsg));
                                                 if (verbose > 1) {
-                                                  fprintf(stdout,"DIO driver: Use Table: %d\n",use_beam_table);
+                                                  fprintf(stdout,"DIO driver: Use Table: %u\n",use_beam_table);
                                                   fprintf(stdout,"DIO driver: Table 1: %s\n",radar_table_1);
                                                   fprintf(stdout,"DIO driver: Table 2: %s\n",radar_table_2);
                                                 }

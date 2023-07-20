@@ -23,7 +23,7 @@ extern int verbose;
 void load_frequency(FILE *ics660, uint32_t chip, int channel, double fr)
 {
   struct ICS660_FREQ freq_str;
-  if (verbose > 2) printf("  In Load frequency file:%d chip:%d channel:%d freq:%lf\n",ics660,chip,channel,fr);	
+  if (verbose > 2) printf("  In Load frequency file:%d chip:%u channel:%d freq:%lf\n",ics660,chip,channel,fr);	
   freq_str.chip = chip;
   freq_str.channel = channel;
   freq_str.freq = fr;
