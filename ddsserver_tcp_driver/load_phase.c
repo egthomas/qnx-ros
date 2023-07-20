@@ -22,7 +22,7 @@ extern int verbose;
 void load_phase(FILE *ics660,uint32_t chip, uint32_t channel, double ph)
 {
   struct ICS660_PHASE phase_str;
-if (verbose > 1) printf("  In Load phase file:%d chip:%u channel:%d phase:%lf\n",ics660,chip,channel,ph);  
+if (verbose > 1) printf("  In Load phase file:%d chip:%u channel:%u phase:%lf\n",ics660,chip,channel,ph);  
   phase_str.chip = chip;
   phase_str.channel = channel;
   phase_str.phase = ph;

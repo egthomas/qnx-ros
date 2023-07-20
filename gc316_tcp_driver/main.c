@@ -951,7 +951,7 @@ int main(int argc, char **argv){
 			if(verbose > 1 ) printf("    start: %d\n",clrfreq_parameters.start);	
 			if(verbose > 1 ) printf("    end: %d\n",clrfreq_parameters.end);	
 			if(verbose > 1 ) printf("    centre: %d\n",centre);	
-			if(verbose > 1 ) printf("    bandwidth: %lf in Khz\n",usable_bandwidth);	
+			if(verbose > 1 ) printf("    bandwidth: %d in Khz\n",usable_bandwidth);	
 			if(verbose > 1 ) printf("    nave:  %d %d\n",nave,clrfreq_parameters.nave);	
                         usable_bandwidth=floor(usable_bandwidth/2)*2 ;
 /*

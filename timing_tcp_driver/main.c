@@ -552,7 +552,7 @@ int main(){
                                 printf("---> Rx Trigger in Master %d at %d\n",max_seq_count,rx_trigger); 
                               } 
                             } else {
-                              if (verbose > 1 ) printf("XXX> Scope Sync not in Master %ld\n",max_seq_count); 
+                              if (verbose > 1 ) printf("XXX> Scope Sync not in Master %d\n",max_seq_count); 
                               dds_trigger=0;
                               rx_trigger=0;
                             }

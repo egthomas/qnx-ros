@@ -692,7 +692,7 @@ control_program);
               if (status) {
               }
               else {
-                if (verbose>-1) fprintf(stderr,"Control Program thread %p Bad status %d no radar channel registered\n", tid,status);
+                if (verbose>-1) fprintf(stderr,"Control Program thread %d Bad status %d no radar channel registered\n", tid,status);
               }
               msg.status=status;
               pthread_mutex_unlock(&controlprogram_list_lock);

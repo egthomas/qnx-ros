@@ -854,7 +854,7 @@ void *receiver_controlprogram_get_data(struct ControlProgram *arg)
         arg->back=NULL;
         gettimeofday(&t1,NULL);
         fprintf(stderr,"RECV::GET_DATA: Bad Status: %d Time: %s",arg->data->status,ctime(&t1.tv_sec));
-        fprintf(stderr,"  Collected: %lu  Errors: %ld  Percentage: %lf\n",collection_count,error_count,error_percent);
+        fprintf(stderr,"  Collected: %lu  Errors: %lu  Percentage: %lf\n",collection_count,error_count,error_percent);
         fflush(stderr);
       }
 
