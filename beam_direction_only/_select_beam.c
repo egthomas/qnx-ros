@@ -20,36 +20,18 @@
 #include "utils.h"
 
 extern int verbose;
+/*
 extern uint32_t use_beam_table;
 extern int32_t *final_beamcodes[MAX_RADARS][32],*final_attencodes[MAX_RADARS][32];
 extern double *final_freqs[MAX_RADARS][32],*final_angles[MAX_RADARS][32];
 extern double f0[MAX_RADARS],fm[MAX_RADARS],df[MAX_RADARS];
 extern int32_t num_freqs[MAX_RADARS],max_angles[MAX_RADARS],num_angles[MAX_RADARS],num_beamcodes[MAX_RADARS],num_fsteps[MAX_RADARS],fstep[MAX_RADARS],foffset[MAX_RADARS],num_cards[MAX_RADARS];
-
+*/
 int lookup_beamcode_by_freq(int r, double freq_mhz,double beamnm){
   int beamcode=beamnm;
   int b,f,a,best_fstep;
   double tdiff,fdiff,best_freq;
-  if (use_beam_table && final_freqs[r][0]) {
-    if(freq_mhz>0) {
-      a=beamnm;
-      fdiff=fm[r];
-      best_fstep=0;
-      best_freq=0.0;
-      for (f=0;f<num_fsteps[r];f++) {
-        b=f*max_angles[r]+a+foffset[r];    
-        tdiff=fabs(final_freqs[r][0][b]-(double)freq_mhz);
-        if(tdiff < fdiff) {
-          fdiff=tdiff;
-          best_fstep=f;
-          best_freq=final_freqs[r][0][b];
-          beamcode=b;
-        }    
-      }
-    }
-  } else {
-    beamcode=beamnm;
-  }
+  beamcode=beamnm;
   return beamcode;
 }
 
@@ -157,19 +139,19 @@ int _select_beam(unsigned int base,struct ControlPRM *client){
                 return -1;
         }
     if (client->radar==1) {
-      if (verbose > 1) printf("Selecting Radar 1 client block");
+      if (verbose > 1) printf("Selecting Radar 1 client block\n");
       portA=PA_GRP_0;
       portB=PB_GRP_0;
       portC=PC_GRP_0;
     }
     if (client->radar==2) {
       if (DEVICE_ID==0x0c78) {
-        if (verbose > 1) printf("Selecting Radar 2 port block");
+        if (verbose > 1) printf("Selecting Radar 2 port block\n");
         portA=PA_GRP_2;
         portB=PB_GRP_2;
         portC=PC_GRP_2;
       } else {
-        if (verbose > 1) printf("Radar 2 port block not available..using Radar 1 ports instead");
+        if (verbose > 1) printf("Radar 2 port block not available..using Radar 1 ports instead\n");
         portA=PA_GRP_0;
         portB=PB_GRP_0;
         portC=PC_GRP_0;
