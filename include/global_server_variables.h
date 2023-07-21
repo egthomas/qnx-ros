@@ -8,11 +8,8 @@
 #ifndef _GLOBAL_SERVER_H
 #define _GLOBAL_SERVER_H
 
-
-#define SITE_NAME "azr"
-
-#define SITE_DIR "/root/operational_radar_code/site_data/"
-//#define SITE_DIR "/tmp/site_data/"
+#define SITE_NAME "unknown"
+#define SITE_DIR "/usr/local/operational_radar_code/site_data/"
 
 #define IF_ENABLED         0 
 #define IF_FREQ            71000 // in KHz
@@ -90,6 +87,7 @@ struct ControlState {
      float current_assigned_noise; 
      int gpssecond;
      int gpsnsecond;
+     int gpscapture;
      double best_assigned_pwr; 
      double current_assigned_pwr; 
      int freq_change_needed; 
@@ -128,10 +126,11 @@ struct BlackList {
 // ros state variables
      int start;
      int end;
-     uint64_t program;
+     void *program;
 };
 #define TIMING_REGISTER_SEQ '+'
 #define DDS_REGISTER_SEQ '+'
+#define RECV_REGISTER_SEQ '+'
 
 #define DIO_CtrlProg_READY '1'
 #define DDS_CtrlProg_READY '1'

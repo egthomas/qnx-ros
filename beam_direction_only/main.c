@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
+#include "control_program.h"
 #include "global_server_variables.h"
 #include "priority.h"
 #include "include/plx_functions.h"
@@ -29,45 +30,29 @@ int main(int argc, char *argv[]){
   // DECLARE AND INITIALIZE ANY NECESSARY VARIABLES
     unsigned int mmap_io_ptr,IOBASE;
     int	pci_handle,IRQ;
-    int i,temp,return_val;
-    int32_t radar=1,card=-1,type=1,maddr=-1,phasecode=-1,attencode=-1;
+    struct ControlPRM client;
+    int i,temp;
+    client.tbeam=-1;
+    client.radar=1;
+    client.tfreq=0;
 
     for(i = 1; i < argc; i++) {  /* Skip argv[0] (program name). */
-      if (strcmp(argv[i], "-m") == 0){
+      if (strcmp(argv[i], "-b") == 0){
         i++;
-        maddr = atoi(argv[i]); 
-      } 
-      if (strcmp(argv[i], "-c") == 0){
-        i++;
-        card = atoi(argv[i]); 
-      } 
-      if (strcmp(argv[i], "-p") == 0){
-        i++;
-        phasecode = atoi(argv[i]); 
-      } 
-      if (strcmp(argv[i], "-a") == 0){
-        i++;
-        attencode = atoi(argv[i]); 
+        client.tbeam = atoi(argv[i]); 
       } 
       if (strcmp(argv[i], "-r") == 0){
         i++;
-        radar = atoi(argv[i]); 
-      } 
-      if (strcmp(argv[i], "-old") == 0){
-        type = 0; 
+        client.radar = atoi(argv[i]); 
       } 
     }
-    if (argc < 2 || maddr < 0 || card < 0 || attencode < 0 || phasecode < 0 ) {
+    if (argc < 2 || client.tbeam < 0 ) {
       fprintf(stdout,"%s called with no arguments\n",argv[0]);
-      fprintf(stdout,"  Required argument -m memory address\n");
-      fprintf(stdout,"  Required argument -c card\n");
-      fprintf(stdout,"  Required argument -p phasecode\n");
-      fprintf(stdout,"  Required argument -a attencode\n");
+      fprintf(stdout,"  Required argument -b beam number, 0 is first beam\n");
       fprintf(stdout,"  Optional argument -r radar number, 1 or 2 for dual site. Default is 1\n");
-      fprintf(stdout,"  Optional argument -old: use for McM phasing cards\n");
-      return -1;
+      return 0;
     } else {
-      fprintf(stdout,"Selected Radar: %d Maddr: %d Card: %d Phase: %d Atten: %d\n",radar,card,maddr,phasecode,attencode);
+      fprintf(stdout,"Selected Radar: %d Beam: %d\n",client.radar,client.tbeam);
     }
 #ifdef __QNX__       
     // SET THE SYSTEM CLOCK RESOLUTION AND GET THE START TIME OF THIS PROCESS 
@@ -111,12 +96,7 @@ int main(int argc, char *argv[]){
         }
 #endif
     // Set Beam 
-        return_val=0;
-        _select_card(IOBASE,radar,card); 
-        _select_beam(IOBASE,radar,card,verbose); 
-        temp=_write_phase(IOBASE,radar,card,maddr,phasecode,type); 
-        if (temp!=0) return_val+=PHASEERR;
-        temp=_write_atten(IOBASE,radar,card,maddr,attencode,type); 
-        if (temp!=0) return_val+=ATTENERR;
-        return return_val;
+        _select_card(IOBASE,&client); 
+        _select_beam(IOBASE,&client); 
+        return 0;
 }

@@ -18,12 +18,23 @@
 
 
 struct TSGbuf {
-  int index;
-  int len;
-  int step;  //packed timesequence stepsize in microseconds
+  int32_t index;
+  int32_t len;
+  int32_t step;  //packed timesequence stepsize in microseconds
+  int32_t mppul; 
+  int32_t nbaud; 
+  int32_t nrang; 
+  int32_t mpinc; 
+  int32_t smsep; 
+  int32_t lagfr; 
+  int32_t txpl; 
   unsigned char *code;
   unsigned char *rep;
+  int32_t *ppat;
+  int32_t *pcode;
 };
+
+
 
 void TSGFree(struct TSGbuf *ptr);
 #endif

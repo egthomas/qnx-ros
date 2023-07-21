@@ -27,8 +27,7 @@ int sock,msgsock;
 int verbose=0;
 int configured=1;
 uint32_t use_beam_table;
-int32_t num_freqs[MAX_RADARS],max_angles[MAX_RADARS],num_angles[MAX_RADARS],num_beamcodes[MAX_RADARS],num_fsteps[MAX_RADARS],foffset[MAX_RADARS],num_cards[MAX_RADARS];
-double fstep[MAX_RADARS];		/* SGS: changed from int32_t to double */
+int32_t num_freqs[MAX_RADARS],max_angles[MAX_RADARS],num_angles[MAX_RADARS],num_beamcodes[MAX_RADARS],num_fsteps[MAX_RADARS],fstep[MAX_RADARS],foffset[MAX_RADARS],num_cards[MAX_RADARS];
 double f0[MAX_RADARS],fm[MAX_RADARS],df[MAX_RADARS];
 double *freqs[MAX_RADARS],*angles[MAX_RADARS];
 int32_t *final_beamcodes[MAX_RADARS][32],*final_attencodes[MAX_RADARS][32];
@@ -413,8 +412,7 @@ int main(){
 						        fread(&max_angles[r],sizeof(int32_t),1,beamtablefile);
 						        fread(&num_beamcodes[r],sizeof(int32_t),1,beamtablefile);
 						        fread(&num_fsteps[r],sizeof(int32_t),1,beamtablefile);
-						        /*fread(&fstep[r],sizeof(int32_t),1,beamtablefile);*/
-						        fread(&fstep[r],sizeof(double),1,beamtablefile);
+						        fread(&fstep[r],sizeof(int32_t),1,beamtablefile);
 						        fread(&foffset[r],sizeof(int32_t),1,beamtablefile);
 						        fread(&f0[r],sizeof(double),1,beamtablefile);
 						        fread(&fm[r],sizeof(double),1,beamtablefile);
